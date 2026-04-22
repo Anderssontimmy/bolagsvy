@@ -1,6 +1,9 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import type { Metadata } from 'next'
+import { WatchlistButton } from '@/components/WatchlistButton'
+import { createClient as createServerClient } from '@/lib/supabase/server'
+import { isPro } from '@/lib/utils/pro'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -36,6 +39,22 @@ export default async function CompanyPage({ params }: Props) {
   if (!company) notFound()
 
   const boardMembers: Array<{ namn: string; roll: string }> = company.board_members ?? []
+
+  const authSupabase = await createServerClient()
+  const { data: { user } } = await authSupabase.auth.getUser()
+
+  let userIsPro = false
+  let isWatching = false
+
+  if (user) {
+    const { data: sub } = await supabase.from('subscriptions').select('plan, current_period_end').eq('user_id', user.id).single()
+    userIsPro = isPro(sub)
+
+    if (userIsPro) {
+      const { data: watch } = await supabase.from('watchlist').select('id').eq('user_id', user.id).eq('company_id', company.id).single()
+      isWatching = !!watch
+    }
+  }
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-10">
@@ -77,15 +96,13 @@ export default async function CompanyPage({ params }: Props) {
         </section>
       )}
 
-      <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-5 text-center">
+      <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-5">
         <p className="font-semibold text-gray-900 mb-1">Bevaka {company.name}</p>
         <p className="text-sm text-gray-500 mb-3">Få e-post när styrelse, adress eller status ändras.</p>
-        <a
-          href="/auth/registrera"
-          className="inline-block px-5 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700"
-        >
-          Starta Pro — 299 kr/mån
-        </a>
+        <WatchlistButton companyId={company.id} isWatching={isWatching} isPro={userIsPro} />
+        {!userIsPro && (
+          <p className="text-xs text-gray-400 text-center mt-2">299 kr/mån · Avsluta när du vill</p>
+        )}
       </div>
     </main>
   )
