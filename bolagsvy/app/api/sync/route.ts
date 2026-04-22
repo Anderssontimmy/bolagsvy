@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getCompany } from '@/lib/bolagsverket/client'
-import { toSlug } from '@/lib/utils/slug'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
