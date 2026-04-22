@@ -8,6 +8,10 @@ interface DigestChange {
   detectedAt: string
 }
 
+function esc(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 export async function sendDigest(to: string, changes: DigestChange[]) {
   const changeLabel: Record<string, string> = {
     board_change: 'Styrelseändring',
@@ -20,8 +24,8 @@ export async function sendDigest(to: string, changes: DigestChange[]) {
     <p style="font-family:sans-serif;color:#6b7280">Ändringar hos dina bevakade bolag den senaste veckan:</p>
     ${changes.map(c => `
       <div style="padding:12px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:8px;font-family:sans-serif">
-        <strong>${c.companyName}</strong><br>
-        <span style="color:#6b7280">${changeLabel[c.changeType] ?? c.changeType} · ${new Date(c.detectedAt).toLocaleDateString('sv-SE')}</span>
+        <strong>${esc(c.companyName)}</strong><br>
+        <span style="color:#6b7280">${esc(changeLabel[c.changeType] ?? c.changeType)} · ${new Date(c.detectedAt).toLocaleDateString('sv-SE')}</span>
       </div>
     `).join('')}
     <p style="font-family:sans-serif;color:#9ca3af;font-size:12px;margin-top:24px">
