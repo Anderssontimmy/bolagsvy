@@ -48,6 +48,14 @@ export default async function SokPage({ searchParams }: Props) {
               </a>
             </div>
           )}
+          {userIsPro && q && (
+            <a
+              href={`/api/export?q=${encodeURIComponent(q)}${city ? `&city=${city}` : ''}${sni ? `&sni=${sni}` : ''}`}
+              className="mt-2 block text-center text-xs text-indigo-600 hover:underline"
+            >
+              Exportera som CSV
+            </a>
+          )}
         </div>
         <div className="col-span-2 flex flex-col gap-2">
           {q && <p className="text-sm text-gray-400">{total} bolag</p>}
