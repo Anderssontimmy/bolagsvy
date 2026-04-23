@@ -5,11 +5,11 @@ import { createClient } from '@/lib/supabase/server'
 import { isPro } from '@/lib/utils/pro'
 
 interface Props {
-  searchParams: Promise<{ q?: string; city?: string; sni?: string }>
+  searchParams: Promise<{ q?: string; city?: string; sni?: string; employees?: string }>
 }
 
 export default async function SokPage({ searchParams }: Props) {
-  const { q = '', city, sni } = await searchParams
+  const { q = '', city, sni, employees } = await searchParams
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -28,6 +28,7 @@ export default async function SokPage({ searchParams }: Props) {
   if (q) url.searchParams.set('q', q)
   if (userIsPro && city) url.searchParams.set('city', city)
   if (userIsPro && sni) url.searchParams.set('sni', sni)
+  if (userIsPro && employees) url.searchParams.set('employees', employees)
 
   const res = await fetch(url.toString(), { cache: 'no-store' })
   const { companies = [], total = 0 } = await res.json()
@@ -50,7 +51,7 @@ export default async function SokPage({ searchParams }: Props) {
           )}
           {userIsPro && q && (
             <a
-              href={`/api/export?q=${encodeURIComponent(q)}${city ? `&city=${city}` : ''}${sni ? `&sni=${sni}` : ''}`}
+              href={`/api/export?q=${encodeURIComponent(q)}${city ? `&city=${city}` : ''}${sni ? `&sni=${sni}` : ''}${employees ? `&employees=${employees}` : ''}`}
               className="mt-2 block text-center text-xs text-indigo-600 hover:underline"
             >
               Exportera som CSV

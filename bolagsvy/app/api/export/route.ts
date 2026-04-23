@@ -20,17 +20,19 @@ export async function GET(req: NextRequest) {
   const q = searchParams.get('q') ?? ''
   const city = searchParams.get('city')
   const sni = searchParams.get('sni')
+  const employees = searchParams.get('employees')
 
-  let query = supabase.from('companies').select('name, org_number, city, county, sni_description, address, registered_at, status').eq('status', 'active').limit(1000)
+  let query = supabase.from('companies').select('name, org_number, city, county, sni_description, address, registered_at, status, employees_class').eq('status', 'active').limit(1000)
   if (q) query = query.ilike('name', `%${q}%`)
   if (city) query = query.ilike('city', `%${city}%`)
   if (sni) query = query.eq('sni_code', sni)
+  if (employees) query = query.eq('employees_class', employees)
 
   const { data: companies } = await query
 
   const rows = [
-    ['Namn', 'Org.nr', 'Stad', 'Bransch', 'Adress', 'Registrerad', 'Status'],
-    ...(companies ?? []).map(c => [c.name, c.org_number, c.city ?? '', c.sni_description ?? '', c.address ?? '', c.registered_at ?? '', c.status]),
+    ['Namn', 'Org.nr', 'Stad', 'Bransch', 'Adress', 'Registrerad', 'Status', 'Anställda'],
+    ...(companies ?? []).map(c => [c.name, c.org_number, c.city ?? '', c.sni_description ?? '', c.address ?? '', c.registered_at ?? '', c.status, c.employees_class ?? '']),
   ]
   const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')
 
