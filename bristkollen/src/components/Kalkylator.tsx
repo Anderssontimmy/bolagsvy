@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode, type RefObject } from "react";
-import { BRISTTYPER, type ProcentRad, type RadId } from "@/data/procentsatser";
+import { BRISTTYPER, PROCENTSATSER, arBristId, type ProcentRad, type RadId } from "@/data/procentsatser";
 import { sparaHandelse } from "@/lib/analys";
 import { datumText, idagIso, kronor, kronorSpann, procentSpann, tolkaTal } from "@/lib/format";
 import { raknaUt, type Falt, type KalkylResultat } from "@/lib/kalkylator";
@@ -13,6 +13,8 @@ type JaNej = "" | "ja" | "nej";
 const FALT_ID: Record<Falt, string> = {
   brist: `k-brist-${BRISTTYPER[0].id}`,
   temperatur: "k-temperatur",
+  ytaTotal: "k-yta-total",
+  ytaObrukbar: "k-yta-obrukbar",
   manadshyra: "k-hyra",
   anmaldSkriftligt: "k-anmald-ja",
   anmalanDatum: "k-anmalan-datum",
@@ -22,6 +24,7 @@ const FALT_ID: Record<Falt, string> = {
 const FALT_ORDNING = Object.keys(FALT_ID) as Falt[];
 
 const UNDERHALL: RadId[] = ["renovering", "kok_badrum"];
+const decimal = (n: number) => String(n).replace(".", ",");
 
 const falt =
   "block w-full rounded-xl border border-linje bg-yta px-4 py-3 text-lg text-black placeholder:text-dampad/70 focus:border-primar aria-invalid:border-glod aria-invalid:border-2";
@@ -29,6 +32,8 @@ const falt =
 export function Kalkylator() {
   const [brist, setBrist] = useState("");
   const [temperatur, setTemperatur] = useState("");
+  const [ytaTotal, setYtaTotal] = useState("");
+  const [ytaObrukbar, setYtaObrukbar] = useState("");
   const [hyra, setHyra] = useState("");
   const [anmald, setAnmald] = useState<JaNej>("");
   const [anmalanDatum, setAnmalanDatum] = useState("");
@@ -38,6 +43,11 @@ export function Kalkylator() {
 
   const startad = useRef(false);
   const fokusRef = useRef<HTMLHeadingElement>(null);
+
+  // Vattenskada räknas på den yta som inte går att använda och behöver två extra frågor.
+  const valdRad = arBristId(brist) && brist !== "kyla" ? (PROCENTSATSER[brist] as ProcentRad) : null;
+  const paYta = valdRad?.berakning === "yta";
+  const extraFragor = brist === "kyla" ? 1 : paYta ? 2 : 0;
 
   useEffect(() => {
     if (utfall) fokusRef.current?.focus();
@@ -59,6 +69,8 @@ export function Kalkylator() {
       brist,
       manadshyra,
       temperatur: brist === "kyla" ? tolkaTal(temperatur) : null,
+      ytaTotal: paYta ? tolkaTal(ytaTotal) : null,
+      ytaObrukbar: paYta ? tolkaTal(ytaObrukbar) : null,
       anmaldSkriftligt: anmald === "" ? null : anmald === "ja",
       anmalanDatum: anmald === "ja" ? anmalanDatum : "",
       atgardad: anmald !== "ja" || atgardad === "" ? null : atgardad === "ja",
@@ -124,9 +136,36 @@ export function Kalkylator() {
           />
         )}
 
+        {paYta && (
+          <>
+            <Textfalt
+              id="k-yta-total"
+              nummer={2}
+              label="Hur stor är din lägenhet?"
+              hjalp="Skriv ytan i kvadratmeter. Den står ofta i hyresavtalet."
+              enhet="kvm"
+              varde={ytaTotal}
+              onChange={setYtaTotal}
+              inputMode="decimal"
+              fel={fel.ytaTotal}
+            />
+            <Textfalt
+              id="k-yta-obrukbar"
+              nummer={3}
+              label="Hur stor yta kan du inte använda på grund av skadan?"
+              hjalp="Till exempel ett sovrum på 12 kvm. Räkna bara yta som inte går att använda alls."
+              enhet="kvm"
+              varde={ytaObrukbar}
+              onChange={setYtaObrukbar}
+              inputMode="decimal"
+              fel={fel.ytaObrukbar}
+            />
+          </>
+        )}
+
         <Textfalt
           id="k-hyra"
-          nummer={brist === "kyla" ? 3 : 2}
+          nummer={2 + extraFragor}
           label="Hur hög är din månadshyra?"
           hjalp="Skriv hyran i kronor per månad, till exempel 8 500."
           enhet="kr"
@@ -138,7 +177,7 @@ export function Kalkylator() {
 
         <Grupp
           legend="Har du anmält bristen skriftligt till hyresvärden?"
-          nummer={brist === "kyla" ? 4 : 3}
+          nummer={3 + extraFragor}
           hjalp="Skriftligt betyder till exempel brev, e-post eller hyresvärdens formulär för felanmälan – något du kan visa upp i efterhand."
           hjalpId="k-anmald-hjalp"
           fel={fel.anmaldSkriftligt}
@@ -442,7 +481,10 @@ function Resultat({
 
       <dl className="mt-6 grid gap-4 border-t border-linje pt-5 text-[0.95rem] sm:grid-cols-2">
         <Rad term="Brist">{r.rad.namn}</Rad>
-        <Rad term="Procent av månadshyran">{procentSpann(r.procent)} (utkast)</Rad>
+        <Rad term="Procent av månadshyran">
+          {procentSpann(r.procent)}
+          {r.yta && ` (${decimal(r.yta.obrukbar)} av ${decimal(r.yta.total)} kvm går inte att använda)`} (utkast)
+        </Rad>
         <Rad term="Antal dagar">
           {dagText}, från {datumText(r.fran)} till {r.pagaende ? `i dag (${datumText(r.till)})` : datumText(r.till)}
         </Rad>

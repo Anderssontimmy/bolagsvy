@@ -17,8 +17,11 @@ export function kronorSpann({ min, max }: Spann): string {
   return `${tal.format(min)}–${tal.format(max)} kr`;
 }
 
+const procent = new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 1 });
+
+/** "5–25 %". Procent som räknats fram från en yta kan ha decimaler: "0–19,4 %". */
 export function procentSpann({ min, max }: Spann): string {
-  return `${min}–${max} %`;
+  return `${procent.format(min)}–${procent.format(max)} %`;
 }
 
 /** "25 november 2026" från "2026-11-25". */

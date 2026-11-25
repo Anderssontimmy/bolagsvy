@@ -20,6 +20,10 @@ export type KalkylIndata = {
   manadshyra: number | null;
   /** Uppmätt inomhustemperatur i °C. Krävs bara för kyla. */
   temperatur: number | null;
+  /** Lägenhetens yta i kvm. Krävs bara för brister som räknas på yta (vattenskada). */
+  ytaTotal: number | null;
+  /** Yta i kvm som inte går att använda. Krävs bara för brister som räknas på yta. */
+  ytaObrukbar: number | null;
   anmaldSkriftligt: boolean | null;
   /** Dagen hyresvärden fick den skriftliga anmälan, ÅÅÅÅ-MM-DD. */
   anmalanDatum: string;
@@ -40,7 +44,10 @@ export type KalkylResultat =
       typ: "uppskattning";
       radId: RadId;
       rad: ProcentRad;
+      /** Procent av hela månadshyran. För brister som räknas på yta är den redan omräknad. */
       procent: Spann;
+      /** Bara för brister som räknas på yta. */
+      yta: { obrukbar: number; total: number } | null;
       dagar: number;
       belopp: Spann;
       fran: string;
@@ -50,9 +57,12 @@ export type KalkylResultat =
 
 const TEMP_MIN = 0;
 const TEMP_MAX = 40;
+const YTA_MAX = 1000; // kvm
 
-export function raknaUt(in_: KalkylIndata): KalkylResultat {
-  const fel = validera(in_);
+type Tabell = Record<RadId, ProcentRad>;
+
+export function raknaUt(in_: KalkylIndata, tabell: Tabell = PROCENTSATSER): KalkylResultat {
+  const fel = validera(in_, tabell);
   if (Object.keys(fel).length > 0) return { typ: "fel", fel };
 
   // validera() har garanterat att dessa värden finns.
@@ -64,19 +74,23 @@ export function raknaUt(in_: KalkylIndata): KalkylResultat {
   }
 
   const radId = valjRad(brist, in_.temperatur);
-  const rad: ProcentRad = PROCENTSATSER[radId];
+  const rad = tabell[radId];
+  const yta = rad.berakning === "yta" ? { obrukbar: in_.ytaObrukbar as number, total: in_.ytaTotal as number } : null;
+  // Brister som räknas på yta: procenten gäller bara den del av lägenheten som inte går att använda.
+  const andel = yta ? yta.obrukbar / yta.total : 1;
+  const procent = rad.procent ? { min: rad.procent.min * andel, max: rad.procent.max * andel } : null;
 
   if (!in_.anmaldSkriftligt) {
-    const perDag = rad.procent
+    const perDag = procent
       ? {
-          min: Math.floor(avrunda(belopp(hyra, rad.procent.min, 1))),
-          max: Math.ceil(avrunda(belopp(hyra, rad.procent.max, 1))),
+          min: Math.floor(avrunda(belopp(hyra, procent.min, 1))),
+          max: Math.ceil(avrunda(belopp(hyra, procent.max, 1))),
         }
       : null;
     return { typ: "ej_anmald", radId, rad, perDag };
   }
 
-  if (!rad.procent) return { typ: "inget_varde", radId, rad };
+  if (!procent) return { typ: "inget_varde", radId, rad };
 
   const fran = in_.anmalanDatum;
   const till = in_.atgardad ? in_.atgardDatum : in_.idag;
@@ -86,11 +100,12 @@ export function raknaUt(in_: KalkylIndata): KalkylResultat {
     typ: "uppskattning",
     radId,
     rad,
-    procent: rad.procent,
+    procent,
+    yta,
     dagar,
     belopp: {
-      min: Math.floor(avrunda(belopp(hyra, rad.procent.min, dagar)) / 10) * 10,
-      max: Math.ceil(avrunda(belopp(hyra, rad.procent.max, dagar)) / 10) * 10,
+      min: Math.floor(avrunda(belopp(hyra, procent.min, dagar)) / 10) * 10,
+      max: Math.ceil(avrunda(belopp(hyra, procent.max, dagar)) / 10) * 10,
     },
     fran,
     till,
@@ -103,10 +118,22 @@ export function valjRad(brist: BristId, temperatur: number | null): RadId {
   return temperatur !== null && temperatur < KYLA_GRANS.lagstaRiktvarde ? "kyla_under_18" : "kyla_18_20";
 }
 
-function validera(in_: KalkylIndata): Partial<Record<Falt, string>> {
+function validera(in_: KalkylIndata, tabell: Tabell): Partial<Record<Falt, string>> {
   const fel: Partial<Record<Falt, string>> = {};
 
   if (!arBristId(in_.brist)) fel.brist = "Välj vilken typ av brist du har.";
+
+  if (arBristId(in_.brist) && in_.brist !== "kyla" && tabell[in_.brist].berakning === "yta") {
+    const total = in_.ytaTotal;
+    const obrukbar = in_.ytaObrukbar;
+    const totalOk = total !== null && Number.isFinite(total) && total > 0 && total <= YTA_MAX;
+    if (!totalOk) fel.ytaTotal = "Skriv hur många kvadratmeter lägenheten är.";
+    if (obrukbar === null || !Number.isFinite(obrukbar) || obrukbar <= 0) {
+      fel.ytaObrukbar = "Skriv hur många kvadratmeter du inte kan använda.";
+    } else if (totalOk && obrukbar > total) {
+      fel.ytaObrukbar = "Ytan du inte kan använda kan inte vara större än hela lägenheten.";
+    }
+  }
 
   if (in_.manadshyra === null || !Number.isFinite(in_.manadshyra)) {
     fel.manadshyra = "Skriv din månadshyra i kronor.";

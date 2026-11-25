@@ -36,6 +36,10 @@ export default function KalkylatorSida() {
             Procentsatserna är riktmärken och inte bindande. Hur mycket hyran sänks bedöms från fall till fall. Därför
             visar vi alltid ett spann, aldrig ett exakt belopp.
           </p>
+          <p className="mt-3">
+            Vid vattenskada räknar vi bara på den del av lägenheten som inte går att använda. Är 12 av 60 kvm
+            obrukbara blir det högst 20 % av hyran.
+          </p>
 
           <h3 className="mt-8 text-xl font-semibold">Procentsatser vi använder</h3>
           <p className="mt-2 text-[0.95rem] text-dampad">Alla värden är {UTKAST}.</p>

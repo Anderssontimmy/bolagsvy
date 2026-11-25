@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { PROCENTSATSER } from "@/data/procentsatser";
 import { raknaUt, type KalkylIndata } from "./kalkylator";
 
 const IDAG = "2026-11-25";
@@ -8,6 +9,8 @@ function indata(andringar: Partial<KalkylIndata> = {}): KalkylIndata {
     brist: "kyla",
     manadshyra: 9000,
     temperatur: 16,
+    ytaTotal: null,
+    ytaObrukbar: null,
     anmaldSkriftligt: true,
     anmalanDatum: "2026-11-01",
     atgardad: true,
@@ -103,18 +106,72 @@ describe("raknaUt – inte anmält skriftligt", () => {
   });
 
   it("har inget belopp per dag för brister utan procentsats", () => {
-    const r = raknaUt(indata({ brist: "hiss", temperatur: null, anmaldSkriftligt: false }));
+    const r = raknaUt(indata({ brist: "hiss", temperatur: null, anmaldSkriftligt: false }), UTAN_HISSVARDE);
     if (r.typ !== "ej_anmald") throw new Error(r.typ);
     expect(r.perDag).toBeNull();
   });
 });
 
-describe("raknaUt – brister utan värde och varma lägenheter", () => {
-  it.each(["hiss", "tvattstuga", "mogel", "vattenskada"])("%s ger inget_varde", (brist) => {
-    const r = raknaUt(indata({ brist, temperatur: null }));
-    expect(r.typ).toBe("inget_varde");
+/** Tabell där hissen saknar värde – för att testa texten "Vi kan inte uppskatta beloppet än". */
+const UTAN_HISSVARDE = { ...PROCENTSATSER, hiss: { ...PROCENTSATSER.hiss, procent: null } };
+
+describe("raknaUt – hiss, tvättstuga och mögel", () => {
+  const trettioDagar = { temperatur: null, anmalanDatum: "2026-10-01", atgardDatum: "2026-10-31" };
+
+  it.each([
+    ["hiss", { min: 0, max: 450 }],
+    ["tvattstuga", { min: 450, max: 900 }],
+    ["mogel", { min: 900, max: 3150 }],
+  ])("%s ger ett belopp", (brist, belopp) => {
+    const r = raknaUt(indata({ brist, ...trettioDagar }));
+    if (r.typ !== "uppskattning") throw new Error(r.typ);
+    expect(r.belopp).toEqual(belopp);
   });
 
+  it("visar texten om att vi inte kan uppskatta när en brist saknar värde", () => {
+    const r = raknaUt(indata({ brist: "hiss", ...trettioDagar }), UTAN_HISSVARDE);
+    expect(r.typ).toBe("inget_varde");
+  });
+});
+
+describe("raknaUt – vattenskada räknas på ytan som inte går att använda", () => {
+  const vatten = { brist: "vattenskada", temperatur: null, anmalanDatum: "2026-10-01", atgardDatum: "2026-10-31" };
+
+  it("räknar 0–100 % för andelen av lägenheten som inte går att använda", () => {
+    const r = raknaUt(indata({ ...vatten, ytaTotal: 60, ytaObrukbar: 12 }));
+    if (r.typ !== "uppskattning") throw new Error(r.typ);
+    // 12 av 60 kvm = 20 %. 9 000 kr × 0–20 % × 30 dagar ÷ 30
+    expect(r.procent).toEqual({ min: 0, max: 20 });
+    expect(r.belopp).toEqual({ min: 0, max: 1800 });
+    expect(r.yta).toEqual({ obrukbar: 12, total: 60 });
+  });
+
+  it("använder ytan även för kostnaden per dag", () => {
+    const r = raknaUt(indata({ ...vatten, ytaTotal: 60, ytaObrukbar: 12, anmaldSkriftligt: false }));
+    if (r.typ !== "ej_anmald") throw new Error(r.typ);
+    expect(r.perDag).toEqual({ min: 0, max: 60 });
+  });
+
+  it("kräver lägenhetens yta och ytan som inte går att använda", () => {
+    const r = raknaUt(indata(vatten));
+    if (r.typ !== "fel") throw new Error(r.typ);
+    expect(r.fel.ytaTotal).toBeDefined();
+    expect(r.fel.ytaObrukbar).toBeDefined();
+  });
+
+  it("avvisar en obrukbar yta som är större än lägenheten eller 0", () => {
+    const storre = raknaUt(indata({ ...vatten, ytaTotal: 40, ytaObrukbar: 50 }));
+    const noll = raknaUt(indata({ ...vatten, ytaTotal: 40, ytaObrukbar: 0 }));
+    expect(storre.typ === "fel" && storre.fel.ytaObrukbar).toBeTruthy();
+    expect(noll.typ === "fel" && noll.fel.ytaObrukbar).toBeTruthy();
+  });
+
+  it("kräver inte yta för andra brister", () => {
+    expect(raknaUt(indata({ brist: "mogel", temperatur: null })).typ).toBe("uppskattning");
+  });
+});
+
+describe("raknaUt – varma lägenheter", () => {
   it("räknar inte 20 °C eller mer som kallt", () => {
     expect(raknaUt(indata({ temperatur: 20 })).typ).toBe("inte_kallt");
     expect(raknaUt(indata({ temperatur: 22.5 })).typ).toBe("inte_kallt");

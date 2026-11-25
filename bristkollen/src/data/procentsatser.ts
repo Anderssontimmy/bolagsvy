@@ -14,6 +14,11 @@ export type ProcentRad = {
   namn: string;
   /** Procent av månadshyran. null = vi har inget värde än. */
   procent: Spann | null;
+  /**
+   * "yta": procenten gäller bara den del av lägenheten som inte går att använda.
+   * Den räknas om till procent av hela hyran: procent × obrukbar yta ÷ lägenhetens yta.
+   */
+  berakning?: "yta";
   kalla: string;
   kallaUrl: string | null;
   status: typeof UTKAST;
@@ -68,10 +73,38 @@ export const PROCENTSATSER = {
     kallaUrl: "https://lawline.se/answers/kallt-i-lagenheten",
     status: UTKAST,
   },
-  hiss: { namn: "Trasig hiss", procent: null, kalla: "–", kallaUrl: null, status: UTKAST },
-  tvattstuga: { namn: "Trasig tvättstuga", procent: null, kalla: "–", kallaUrl: null, status: UTKAST },
-  mogel: { namn: "Mögel", procent: null, kalla: "–", kallaUrl: null, status: UTKAST },
-  vattenskada: { namn: "Vattenskada", procent: null, kalla: "–", kallaUrl: null, status: UTKAST },
+  // Tillagda 2026-11-25 på ägarens begäran, från samma referenstabell. När källan bara anger
+  // ett värde visar vi ett spann från 0, eftersom vi aldrig visar exakta belopp.
+  hiss: {
+    namn: "Trasig hiss",
+    procent: { min: 0, max: 5 },
+    kalla: "Hyresgästföreningens referenstabell, enligt Hem & Hyra, anger 5 %. Spannet från 0 % är vårt utkast",
+    kallaUrl: HEM_HYRA,
+    status: UTKAST,
+  },
+  tvattstuga: {
+    namn: "Trasig tvättstuga",
+    procent: { min: 5, max: 10 },
+    kalla: "Hyresgästföreningens referenstabell (tvättstuga och torkmöjligheter), enligt Hem & Hyra",
+    kallaUrl: HEM_HYRA,
+    status: UTKAST,
+  },
+  mogel: {
+    namn: "Mögel",
+    procent: { min: 10, max: 35 },
+    kalla: "Hyresgästföreningens referenstabell, enligt Hem & Hyra",
+    kallaUrl: HEM_HYRA,
+    status: UTKAST,
+  },
+  vattenskada: {
+    namn: "Vattenskada – yta som inte går att använda",
+    procent: { min: 0, max: 100 },
+    berakning: "yta",
+    kalla:
+      "Hyresgästföreningens referenstabell, enligt Hem & Hyra, anger 100 % för de kvadratmeter som inte går att använda. Spannet från 0 % är vårt utkast",
+    kallaUrl: HEM_HYRA,
+    status: UTKAST,
+  },
 } as const satisfies Record<string, ProcentRad>;
 
 export type RadId = keyof typeof PROCENTSATSER;

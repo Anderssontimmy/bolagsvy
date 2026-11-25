@@ -15,9 +15,23 @@ Fil: `src/data/procentsatser.ts`. Visas i kalkylatorn och på `/kalkylator`.
 | Kök eller badrum går inte att använda | 35–45 % | fastigheter.se anger cirka 40 %. Spannet är ett utkast |
 | Kyla, 18–20 °C | 0–5 % | Utkast. Enligt Hyresgästföreningen kan hyresgästen under 20 °C kräva att hyresvärden utreder och mäter |
 | Kyla, under 18 °C | 5–25 % | Utkast. Folkhälsomyndighetens lägsta riktvärde är 18 °C. Ett enskilt Lawline-svar nämner 25 % vid 15 °C, men det är ingen norm |
-| Trasig hiss, trasig tvättstuga, mögel, vattenskada | Inget värde | Visar "Vi kan inte uppskatta beloppet än – anmäl ändå" |
+| Trasig hiss | 0–5 % | Hyresgästföreningens referenstabell, enligt Hem & Hyra, anger 5 %. Spannet från 0 % är vårt utkast |
+| Trasig tvättstuga | 5–10 % | Samma tabell ("tvättstuga och torkmöjligheter") |
+| Mögel | 10–35 % | Samma tabell |
+| Vattenskada | 0–100 % av den yta som inte går att använda | Samma tabell anger 100 % för obrukbar yta ("för de kvadratmeter som påverkas"). Spannet från 0 % är vårt utkast |
+
+Hiss, tvättstuga, mögel och vattenskada lades till 2026-11-25 på ägarens begäran. Regel: när källan bara anger ett
+värde visar vi ett spann från 0 %, eftersom vi aldrig visar exakta belopp. Vid vattenskada frågar kalkylatorn efter
+lägenhetens yta och den yta som inte går att använda, och räknar procent × obrukbar yta ÷ total yta.
+
+**Kyla skiljer sig från källan.** Samma referenstabell anger 18–20 °C: 0–10 %, 16–17 °C: 30–50 % och under 16 °C:
+100 %. Ägaren valde 2026-11-25 att behålla de försiktigare värdena ovan tills juristen har tagit ställning.
 
 - [ ] Är spannen rimliga som riktmärken? Får vi visa dem på det här sättet?
+- [ ] Är det rimligt att låta spannet börja på 0 % när källan bara anger ett värde (hiss, vattenskada)?
+- [ ] Vattenskada: är det rätt att bara räkna yta som inte går att använda alls? Fukt och lukt utan obrukbar yta ger
+      i dag inget belopp.
+- [ ] Kyla: ska vi gå över till referenstabellens högre värden?
 - [ ] Gränser för kyla: under 18,0 °C ger "under 18". 18,0 till och med 19,9 °C ger "18–20". **20,0 °C eller mer räknas
       inte som kallt.** Är det rätt att 20,0 °C inte ger något?
 - [ ] Är det rätt att räkna buller och damm under ett stambyte som "renovering"?
