@@ -19,7 +19,7 @@ export interface VantelistaLagring {
   spara(post: VantelistaPost): Promise<void>;
 }
 
-type Env = Partial<Record<"SUPABASE_URL" | "SUPABASE_SECRET_KEY", string>>;
+type Env = Record<string, string | undefined>;
 
 export function hamtaLagring(env: Env = process.env): VantelistaLagring {
   const { SUPABASE_URL, SUPABASE_SECRET_KEY } = env;

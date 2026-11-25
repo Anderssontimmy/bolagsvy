@@ -24,7 +24,7 @@ export const brand = {
     primar: "#1d4b66", // vinterblå: knappar och länkar
     primarMork: "#143749", // hover
     frost: "#e4eef3", // ljusblå ytor
-    glod: "#b5541a", // bärnsten: accent och fokusring
+    glod: "#a84d16", // bärnsten: accent och fokusring
     glodLjus: "#fbeee2", // varningsrutor
   },
 } as const;

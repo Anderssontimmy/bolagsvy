@@ -9,11 +9,9 @@ export function skapaBegransare({ max, fonsterMs }: { max: number; fonsterMs: nu
 
   return function tillat(nyckel: string, nu: number = Date.now()): boolean {
     const grans = nu - fonsterMs;
+    // Rensa adresser vars fönster har gått ut, så att inga IP-adresser ligger kvar i onödan.
+    for (const [k, tider] of traffar) if (tider.every((t) => t <= grans)) traffar.delete(k);
     const aktuella = (traffar.get(nyckel) ?? []).filter((t) => t > grans);
-
-    if (traffar.size > 5000) {
-      for (const [k, tider] of traffar) if (tider.every((t) => t <= grans)) traffar.delete(k);
-    }
 
     if (aktuella.length >= max) {
       traffar.set(nyckel, aktuella);

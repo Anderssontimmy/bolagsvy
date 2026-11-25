@@ -40,6 +40,7 @@ export type KalkylResultat =
       typ: "uppskattning";
       radId: RadId;
       rad: ProcentRad;
+      procent: Spann;
       dagar: number;
       belopp: Spann;
       fran: string;
@@ -85,6 +86,7 @@ export function raknaUt(in_: KalkylIndata): KalkylResultat {
     typ: "uppskattning",
     radId,
     rad,
+    procent: rad.procent,
     dagar,
     belopp: {
       min: Math.floor(avrunda(belopp(hyra, rad.procent.min, dagar)) / 10) * 10,
