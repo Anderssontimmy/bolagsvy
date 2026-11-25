@@ -239,7 +239,11 @@ function Grupp({
   return (
     <fieldset aria-describedby={beskrivning}>
       <legend className="mb-3 text-lg font-bold">
-        {nummer !== undefined && <span className="mr-2 font-serif text-glod">{nummer}.</span>}
+        {nummer !== undefined && (
+          <span aria-hidden="true" className="mr-2 font-serif text-glod">
+            {nummer}.
+          </span>
+        )}
         {legend}
       </legend>
       {hjalp && (
@@ -310,7 +314,11 @@ function Textfalt({
   return (
     <div>
       <label htmlFor={id} className="mb-3 block text-lg font-bold">
-        {nummer !== undefined && <span className="mr-2 font-serif text-glod">{nummer}.</span>}
+        {nummer !== undefined && (
+          <span aria-hidden="true" className="mr-2 font-serif text-glod">
+            {nummer}.
+          </span>
+        )}
         {label}
       </label>
       {hjalp && (
