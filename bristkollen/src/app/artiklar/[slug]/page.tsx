@@ -6,6 +6,10 @@ import { knappPrimar } from "@/components/knappar";
 import { ARTIKLAR, hamtaArtikel } from "@/content/artiklar";
 import { datumText } from "@/lib/format";
 
+// De kända artiklarna förrenderas. En okänd slug får vänta in svaret så att den ger en riktig 404
+// (med <Suspense> skulle den strömmas ut med status 200).
+export const instant = false;
+
 export function generateStaticParams() {
   return ARTIKLAR.map((a) => ({ slug: a.slug }));
 }
