@@ -100,7 +100,23 @@ Fil: `src/content/sidor/integritet.mdx`. Samtyckestexten finns i `src/components
       från.
 - [ ] Samtyckestexten vid väntelistan.
 
-## 6. Marknadsföring och påståenden
+## 6. Anmälan till hyresvärden (fas 2, byggd 2026-11-25)
+
+Filer: `src/lib/anmalan/brev.ts` (texterna), `src/components/AnmalanFormular.tsx`, `src/app/api/anmalan/`.
+
+- [ ] Brevtexten, särskilt: "Jag begär nedsättning av hyran från och med den dag ni tar emot den här anmälan, tills
+      bristen är åtgärdad."
+- [ ] Avsändaren visas som "Namn via Bristkollen" från vår adress. Svar går till hyresgästen (reply-to), och
+      hyresgästen får en kopia. Sista stycket säger att anmälan skickades via oss på uppdrag av hyresgästen.
+- [ ] Gäller ett mejl som vi skickar som hyresgästens skriftliga anmälan? (Se öppen fråga 3.)
+- [ ] Uppdragstexten: "Jag ger Bristkollen i uppdrag att skicka anmälan i mitt namn till hyresvärden. Uppgifterna
+      stämmer."
+- [ ] Skyddet mot missbruk: inget skickas förrän hyresgästen har bekräftat via en länk till sin egen e-post (giltig i
+      24 timmar). Räcker det?
+- [ ] Lagringstid: förslaget är 3 år för skickade anmälningar och 7 dagar för obekräftade.
+- [ ] Nya avsnitt i villkoren och integritetspolicyn (rättslig grund: avtal, Resend som biträde i USA).
+
+## 7. Marknadsföring och påståenden
 
 - [ ] Rubriken "Du kan ha rätt till sänkt hyra" och att vi aldrig lovar ett visst utfall.
 - [ ] Att vi nämner Hyresgästföreningen, Folkhälsomyndigheten, Fastighetsägarna och Lawline som källor. På om-sidan står

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Kalkylator } from "@/components/Kalkylator";
+import { utskickLage } from "@/lib/anmalan/tjanst";
 import { Vantelista } from "@/components/Vantelista";
 import { PROCENTSATSER, UTKAST, type ProcentRad } from "@/data/procentsatser";
 import { procentSpann } from "@/lib/format";
@@ -20,7 +21,7 @@ export default function KalkylatorSida() {
           Svara på några frågor så får du en uppskattning i kronor. Vi sparar inte din hyra eller dina datum.
         </p>
         <div className="mt-8">
-          <Kalkylator />
+          <Kalkylator anmalanAktiv={utskickLage() !== "av"} />
         </div>
 
         <section aria-labelledby="sa-raknar-vi" className="mt-14">

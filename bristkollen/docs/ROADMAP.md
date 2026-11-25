@@ -13,10 +13,17 @@ förrän en jurist har sagt att det är tillåtet (det kan kräva inkassotillst�
 
 ## Fas 2 – bristdagbok och anmälan med ett klick
 
+**Byggt 2026-11-25:** anmälan med ett klick (`/anmal`). Hyresgästen fyller i, granskar texten och bekräftar via en
+länk i sin egen e-post. Anmälan mejlas till hyresvärden med kopia till hyresgästen och sparas oförändrad som bevis.
+Testläge lokalt. Avstängd i produktion tills Resend och Supabase är inställda (se README).
+
+Kvar i fas 2:
+
 - Konto (Supabase Auth, inloggning med e-postlänk)
 - Bristdagbok: foto, temperatur och anteckning, med tidsstämpel från servern
-- Formell anmälan till hyresvärden som skickas via e-post med ett klick
-- Varje utskick loggas och sparas oförändrat som bevis (innehåll, mottagare, tid och leveransstatus)
+- Leveransstatus från Resend (levererad, studsad) via webhook
+- Automatisk radering av obekräftade anmälningar
+- Register över hyresvärdarnas adresser för felanmälan, så att hyresgästen slipper leta
 - Väntelistan bjuds in först
 
 ## Fas 3 – kravbrev och vägledning

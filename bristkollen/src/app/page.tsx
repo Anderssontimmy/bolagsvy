@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Kalkylator } from "@/components/Kalkylator";
+import { utskickLage } from "@/lib/anmalan/tjanst";
 import { SaFunkarDet } from "@/components/SaFunkarDet";
 import { TempSkala } from "@/components/TempSkala";
 import { VanligaFragor } from "@/components/VanligaFragor";
@@ -64,7 +65,7 @@ export default function Startsida() {
             Svara på några frågor så får du en uppskattning i kronor. Vi sparar inte din hyra eller dina datum.
           </p>
           <div className="mt-8">
-            <Kalkylator />
+            <Kalkylator anmalanAktiv={utskickLage() !== "av"} />
           </div>
         </div>
       </section>

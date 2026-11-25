@@ -29,7 +29,8 @@ const decimal = (n: number) => String(n).replace(".", ",");
 const falt =
   "block w-full rounded-xl border border-linje bg-yta px-4 py-3 text-lg text-black placeholder:text-dampad/70 focus:border-primar aria-invalid:border-glod aria-invalid:border-2";
 
-export function Kalkylator() {
+/** anmalanAktiv: visa knappen "Anmäl bristen till hyresvärden" (bara när utskick är påslaget). */
+export function Kalkylator({ anmalanAktiv = false }: { anmalanAktiv?: boolean }) {
   const [brist, setBrist] = useState("");
   const [temperatur, setTemperatur] = useState("");
   const [ytaTotal, setYtaTotal] = useState("");
@@ -250,7 +251,7 @@ export function Kalkylator() {
 
       {utfall && utfall.r.typ !== "fel" && (
         <div className="fram mt-8">
-          <Resultat r={utfall.r} hyra={utfall.hyra} rubrikRef={fokusRef} />
+          <Resultat r={utfall.r} hyra={utfall.hyra} rubrikRef={fokusRef} anmalanAktiv={anmalanAktiv} />
         </div>
       )}
     </div>
@@ -396,10 +397,12 @@ function Resultat({
   r,
   hyra,
   rubrikRef,
+  anmalanAktiv,
 }: {
   r: Exclude<KalkylResultat, { typ: "fel" }>;
   hyra: number;
   rubrikRef: RefObject<HTMLHeadingElement | null>;
+  anmalanAktiv: boolean;
 }) {
   const rubrik = "font-serif text-2xl font-semibold outline-none";
 
@@ -440,7 +443,7 @@ function Resultat({
           <p className="mt-4 text-xl font-bold">Vi kan inte uppskatta beloppet än – anmäl ändå.</p>
         )}
         <p className="mt-5 text-lg font-bold">Anmäl bristen skriftligt i dag.</p>
-        <NastaSteg />
+        <NastaSteg anmalanAktiv={anmalanAktiv} />
       </Ruta>
     );
   }
@@ -455,7 +458,7 @@ function Resultat({
           Vi har inget underlag för att uppskatta nedsättningen för {r.rad.namn.toLowerCase()} ännu. Du kan ändå ha rätt
           till sänkt hyra. Hur mycket bedöms från fall till fall.
         </p>
-        <NastaSteg />
+        <NastaSteg anmalanAktiv={anmalanAktiv} />
       </Ruta>
     );
   }
@@ -507,7 +510,7 @@ function Resultat({
       )}
       <Kalla rad={r.rad} />
       <p className="mt-5 text-lg font-bold">Nästa steg: begär nedsättningen skriftligt och spara en kopia.</p>
-      <NastaSteg />
+      <NastaSteg anmalanAktiv={anmalanAktiv} />
     </Ruta>
   );
 }
@@ -550,7 +553,29 @@ function Kalla({ rad }: { rad: ProcentRad }) {
   );
 }
 
-function NastaSteg() {
+function NastaSteg({ anmalanAktiv }: { anmalanAktiv: boolean }) {
+  if (anmalanAktiv) {
+    return (
+      <ul className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <li>
+          <Link
+            href="/anmal"
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-primar px-5 py-3 font-bold text-white hover:bg-primar-mork sm:w-auto"
+          >
+            Anmäl bristen till hyresvärden
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/artiklar/sa-anmaler-du-en-brist"
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border-2 border-primar bg-yta px-5 py-3 font-bold text-primar hover:bg-frost sm:w-auto"
+          >
+            Så anmäler du en brist
+          </Link>
+        </li>
+      </ul>
+    );
+  }
   return (
     <ul className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
       <li>

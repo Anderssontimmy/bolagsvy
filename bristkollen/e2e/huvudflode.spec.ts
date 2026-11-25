@@ -75,8 +75,15 @@ test("artiklar har ansvarsruta, granskningsdatum och källor", async ({ page }) 
   await expect(page.getByRole("heading", { name: "Källor" })).toBeVisible();
 });
 
+test("anmälan till hyresvärden är avstängd när e-post inte är inställd", async ({ page }) => {
+  await page.goto("/anmal");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Anmäl bristen till hyresvärden");
+  await expect(page.getByText(/Snart kan du skicka en skriftlig anmälan/)).toBeVisible();
+  await expect(page.getByLabel("Ditt namn")).toHaveCount(0);
+});
+
 test("ingen sida scrollar i sidled", async ({ page }) => {
-  for (const sida of ["/", "/kalkylator", "/artiklar", "/artiklar/sa-anmaler-du-en-brist", "/integritet", "/om"]) {
+  for (const sida of ["/", "/kalkylator", "/anmal", "/artiklar", "/artiklar/sa-anmaler-du-en-brist", "/integritet", "/om"]) {
     await page.goto(sida);
     const bredd = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(bredd, sida).toBeLessThanOrEqual(0);

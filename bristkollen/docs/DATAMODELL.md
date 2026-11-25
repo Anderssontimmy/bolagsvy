@@ -94,6 +94,9 @@ Bristdagboken. Raderna ändras aldrig – rättelser blir nya rader.
 Ta bort EXIF-data med GPS-position från foton innan de sparas (integritet).
 
 ### utskick
+Första versionen finns redan som tabellen `anmalan` (fas 2, se `supabase/schema.sql`). Den kopplas till `brist` när
+konton finns.
+
 Allt vi skickar till hyresvärden. Raderna ändras aldrig (append only). Bara leveransstatus uppdateras, i en egen
 tabell eller kolumn.
 

@@ -2,7 +2,7 @@
  * Statistik via Plausible (cookiefritt). Slås på med NEXT_PUBLIC_PLAUSIBLE_DOMAIN.
  * Utan den skickas ingenting.
  */
-export type Handelse = "kalkylator_start" | "kalkylator_klar" | "vantelista_anmalan";
+export type Handelse = "kalkylator_start" | "kalkylator_klar" | "vantelista_anmalan" | "anmalan_skickad";
 
 type Plausible = ((handelse: string, val?: { props: Record<string, string> }) => void) & { q?: unknown[] };
 

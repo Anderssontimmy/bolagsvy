@@ -29,6 +29,20 @@ export function datumText(iso: string): string {
   return datum.format(new Date(`${iso}T00:00:00Z`));
 }
 
+const tid = new Intl.DateTimeFormat("sv-SE", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "Europe/Stockholm",
+});
+
+/** "25 november 2026 kl. 14:32" i svensk tid. */
+export function tidText(iso: string): string {
+  return tid.format(new Date(iso));
+}
+
 /** Dagens datum i användarens tidszon som ÅÅÅÅ-MM-DD. */
 export function idagIso(nu: Date = new Date()): string {
   const tva = (n: number) => String(n).padStart(2, "0");

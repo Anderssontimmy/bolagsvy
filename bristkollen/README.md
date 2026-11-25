@@ -51,20 +51,39 @@ Kopiera `.env.example` till `.env.local` och fyll i det du behöver. Allt är fr
 | `NEXT_PUBLIC_SITE_URL`         | Ja                 | Sajtens adress, t.ex. `https://bristkollen.se`. Används i sitemap och metadata.                    |
 | `SUPABASE_URL`                 | Ja                 | Projektets URL, t.ex. `https://abcd.supabase.co`.                                                 |
 | `SUPABASE_SECRET_KEY`          | Ja                 | Hemlig nyckel (`sb_secret_…`) eller äldre `service_role`-nyckel. Bara på servern – aldrig `NEXT_PUBLIC_`. |
+| `RESEND_API_KEY`               | För anmälan        | Nyckel från Resend. Slår på anmälan till hyresvärden, tillsammans med `UTSKICK_FRAN` och Supabase. |
+| `UTSKICK_FRAN`                 | För anmälan        | Avsändare, t.ex. `Bristkollen <anmalan@bristkollen.se>`. Domänen måste vara verifierad i Resend.   |
 | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | Nej                | Slår på Plausible, t.ex. `bristkollen.se`. Tomt = ingen statistik.                                |
 | `NEXT_PUBLIC_PLAUSIBLE_SRC`    | Nej                | Annan skriptadress, om Plausible ger dig en egen. Standard: `https://plausible.io/js/script.js`.   |
 
 Om `SUPABASE_URL` eller `SUPABASE_SECRET_KEY` saknas i produktion sparas väntelistan bara i minnet, och servern
 loggar en varning. Sätt alltid båda innan lansering.
 
+### Anmälan till hyresvärden – tre lägen
+
+| Läge  | När                                                                            | Vad händer                                                                 |
+| ----- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| Test  | Lokalt (`npm run dev`) utan `RESEND_API_KEY`                                   | Inga mejl skickas. Bekräftelselänken visas på skärmen. Allt sparas i minnet. |
+| Av    | Produktion utan alla fyra: `RESEND_API_KEY`, `UTSKICK_FRAN`, `SUPABASE_URL`, `SUPABASE_SECRET_KEY` | `/anmal` visar "snart" och väntelistan. Knappen i kalkylatorn syns inte.   |
+| Skarp | Alla fyra är satta                                                             | Riktiga mejl. Anmälningar sparas i Supabase.                               |
+
+Flödet: hyresgästen fyller i `/anmal` och ser exakt vilken text som skickas → vi mejlar en bekräftelselänk till
+hyresgästen → hyresgästen öppnar länken och trycker på Skicka → anmälan går till hyresvärden med kopia till hyresgästen,
+och svar går direkt till hyresgästen (reply-to). Ingenting skickas utan att hyresgästen har bekräftat från sin egen
+e-post, så ingen kan skicka anmälningar i någon annans namn.
+
+**Ställ in Resend:** skapa ett konto på resend.com → *Domains → Add domain* (din domän) → lägg in DNS-posterna som
+Resend visar (SPF och DKIM) → vänta tills domänen är verifierad → skapa en API-nyckel med behörigheten *Sending access*.
+
 Statistikhändelser: `kalkylator_start` (första ändringen i kalkylatorn), `kalkylator_klar` (ett resultat visas, med
-egenskaperna `brist` och `utfall`) och `vantelista_anmalan` (lyckad anmälan, med `brist` om den är vald). För att se
+egenskaperna `brist` och `utfall`) och `vantelista_anmalan` (lyckad anmälan, med `brist` om den är vald) och `anmalan_skickad` (en anmälan har skickats till hyresvärden). För att se
 egenskaperna i Plausible: lägg till dem under *Site settings → Custom properties*.
 
 ## Supabase
 
 1. Skapa ett projekt i en EU-region (till exempel Stockholm, `eu-north-1`).
-2. Öppna **SQL Editor** och kör SQL:en nedan. Den finns också i [supabase/schema.sql](supabase/schema.sql).
+2. Öppna **SQL Editor** och kör hela [supabase/schema.sql](supabase/schema.sql). Den skapar `vantelista` (nedan) och
+   `anmalan` (anmälningar till hyresvärden, med en regel som stoppar ändringar av innehållet i efterhand).
 3. Hämta **Project URL** och en **Secret key** under *Project Settings → API Keys*. Sätt dem som `SUPABASE_URL` och
    `SUPABASE_SECRET_KEY`.
 
@@ -105,7 +124,9 @@ redan finns.
 - [ ] Fyll i vem som driver tjänsten och är personuppgiftsansvarig (`[… – fylls i före lansering]` i
       `src/content/sidor/*.mdx`).
 - [ ] Kontaktadressen i `src/config/brand.ts` tar emot mejl.
-- [ ] Supabase-tabellen finns, och miljövariablerna är satta i Vercel.
+- [ ] Supabase-tabellerna finns, och miljövariablerna är satta i Vercel.
+- [ ] För anmälan till hyresvärden: domänen är verifierad i Resend, `RESEND_API_KEY` och `UTSKICK_FRAN` är satta, och
+      texten på väntelistan ("Snart kan du anmäla …") är uppdaterad.
 - [ ] Byt `integritetVersion` i `src/config/brand.ts` när policyn ändras.
 
 ## Struktur
@@ -116,8 +137,10 @@ src/
   data/procentsatser.ts    Procenttabellen (utkast) med källa per rad
   lib/kalkylator.ts        Kalkylatorns logik (ren TypeScript, testad)
   lib/vantelista/          Validering, begränsning av anrop och lagring (minne/Supabase)
+  lib/anmalan/             Anmälan till hyresvärden: brevtext, validering, lagring och läge (test/av/skarp)
+  lib/epost.ts             Utskick via Resend
   lib/analys.ts            Plausible-händelser
-  app/                     Sidor och API (/api/waitlist)
+  app/                     Sidor och API (/api/waitlist, /api/anmalan)
   components/              Kalkylator, väntelista, sidhuvud m.m.
   content/artiklar/*.mdx   Artiklarna (metadata och källor i content/artiklar.ts)
   content/sidor/*.mdx      Integritetspolicy, villkor och om-sidan

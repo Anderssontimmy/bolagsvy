@@ -5,8 +5,9 @@ import { brand } from "@/config/brand";
 - Vi samlar in så lite som möjligt.
 - Kalkylatorn räknar i din webbläsare. Vi sparar inte din hyra eller dina datum.
 - Väntelistan sparar din e-postadress. Om du vill sparar den också typ av brist och postnummer.
+- Ber du oss skicka en anmälan till din hyresvärd skickar vi dina uppgifter till hyresvärden. Det är hela syftet.
 - Vi använder inga kakor (cookies). Därför ser du ingen kakbanner.
-- Vi säljer aldrig dina uppgifter, och vi delar dem inte med din hyresvärd.
+- Vi säljer aldrig dina uppgifter. Din hyresvärd får bara det du själv ber oss skicka.
 
 ## Vem ansvarar för dina uppgifter?
 
@@ -28,6 +29,20 @@ När du skriver upp dig sparar vi:
 
 **Rättslig grund:** Ditt samtycke (artikel 6.1 a i dataskyddsförordningen, GDPR). Du kan ta tillbaka ditt samtycke när du vill.
 
+### Anmälan till hyresvärden
+
+När du ber oss skicka en anmälan sparar vi:
+
+- ditt namn, din e-postadress och ditt telefonnummer (om du fyller i det)
+- adressen och lägenhetsnumret
+- hyresvärdens namn och e-postadress
+- bristen och din beskrivning
+- hela texten i anmälan, när den skapades och när den skickades.
+
+**Varför:** För att skicka anmälan som du har bett om, och för att spara en kopia som visar vad som skickades och när. Anmälan går till din hyresvärd, med kopia till dig.
+
+**Rättslig grund:** Avtal – vi utför den tjänst du beställer (artikel 6.1 b GDPR).
+
 ### Kalkylatorn
 
 Kalkylatorn räknar i din webbläsare. Din hyra, dina datum och din temperatur skickas inte till oss. Om statistik är påslagen räknar vi anonymt hur många som använder kalkylatorn, vilken typ av brist de väljer och vilket slags resultat de får.
@@ -40,7 +55,7 @@ Vi använder Plausible Analytics för att räkna besök. Plausible använder ing
 
 ### Skydd mot spam
 
-När du skickar formuläret för väntelistan använder servern din IP-adress en kort stund, cirka 10 minuter, för att stoppa för många anmälningar från samma adress. IP-adressen finns bara i serverns arbetsminne. Den sparas inte i vår databas.
+När du skickar ett formulär använder servern din IP-adress en kort stund, cirka 10 minuter, för att stoppa för många anmälningar från samma adress. IP-adressen finns bara i serverns arbetsminne. Den sparas inte i vår databas.
 
 **Rättslig grund:** Vårt berättigade intresse av att skydda tjänsten (artikel 6.1 f GDPR).
 
@@ -52,13 +67,18 @@ Om du mejlar oss använder vi det du skriver för att svara dig.
 
 Vi sparar dina uppgifter på väntelistan tills du ber oss ta bort dem eller tar tillbaka ditt samtycke, men högst 24 månader efter att du skrev upp dig. [Förslag – ska bekräftas.]
 
+Skickade anmälningar sparar vi i 3 år, så att du kan få en kopia om du behöver den i en tvist. Anmälningar som aldrig bekräftas raderar vi efter 7 dagar. [Förslag – ska bekräftas. Raderingen är inte automatiserad än.]
+
 ## Vilka som får ta del av uppgifterna
 
 Vi använder några leverantörer för att driva tjänsten. De kallas *personuppgiftsbiträden* och får bara använda uppgifterna enligt våra instruktioner:
 
-- **Supabase** – databas där väntelistan sparas. Servrar inom EU.
+- **Supabase** – databas där väntelistan och anmälningarna sparas. Servrar inom EU.
 - **Vercel** – driver webbplatsen. Vercel är ett amerikanskt företag, så uppgifter kan föras över till USA. Överföringen ska skyddas enligt EU:s regler, till exempel EU:s beslut om ramverket för dataskydd mellan EU och USA eller EU:s standardavtalsklausuler. [Ska kontrolleras före lansering.]
 - **Plausible** – statistik utan kakor. Företag och servrar inom EU.
+- **Resend** – skickar mejlen när du anmäler en brist. Resend är ett amerikanskt företag, så uppgifter kan föras över till USA med samma skydd som för Vercel. [Ska kontrolleras före lansering.]
+
+Din **hyresvärd** får anmälan som du ber oss skicka. Hyresvärden blir själv ansvarig för hur uppgifterna används där.
 
 ## Dina rättigheter
 
