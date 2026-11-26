@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import hero from "@/assets/hero-kallt-hemma.jpg";
 import { Kalkylator } from "@/components/Kalkylator";
 import { utskickLage } from "@/lib/anmalan/tjanst";
 import { SaFunkarDet } from "@/components/SaFunkarDet";
@@ -12,18 +14,30 @@ export default function Startsida() {
   return (
     <>
       <section className="relative overflow-hidden">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-48 -right-40 h-[30rem] w-[30rem] rounded-full bg-glod/10 blur-3xl"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute top-40 -left-52 h-[26rem] w-[26rem] rounded-full bg-primar/10 blur-3xl"
-        />
-        <div className="relative mx-auto grid max-w-5xl gap-10 px-4 pt-10 pb-16 sm:px-6 md:grid-cols-[1.25fr_1fr] md:items-center md:pt-16">
-          <div className="fram">
+        {/* Fotot: ett band överst på mobil, till höger bakom texten på dator. Det tonar ut mot sidans färg. */}
+        <div className="relative h-56 sm:h-80 lg:absolute lg:inset-y-0 lg:right-0 lg:left-[calc(50%-1.5rem)] lg:h-auto">
+          <Image
+            src={hero}
+            alt=""
+            fill
+            preload
+            placeholder="blur"
+            sizes="(min-width: 1024px) 55vw, 100vw"
+            className="object-cover object-[18%_center] opacity-90"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-papper to-transparent lg:h-1/4"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-y-0 left-0 hidden w-1/6 bg-gradient-to-r from-papper to-transparent lg:block"
+          />
+        </div>
+        <div className="relative mx-auto max-w-5xl px-4 pt-2 pb-14 sm:px-6 lg:pt-16 lg:pb-20">
+          <div className="fram lg:max-w-[27rem]">
             <p className="text-sm font-bold tracking-[0.08em] text-glod uppercase">För dig som hyr i första hand</p>
-            <h1 className="mt-3 text-[2.15rem] font-semibold tracking-tight sm:text-5xl">
+            <h1 className="mt-3 text-[2.15rem] font-semibold tracking-tight sm:text-5xl lg:text-[2.75rem]">
               Kallt hemma eller trasigt i lägenheten?{" "}
               <span className="text-primar">Du kan ha rätt till sänkt hyra.</span>
             </h1>
@@ -31,7 +45,7 @@ export default function Startsida() {
               Hyran kan sänkas när lägenheten har brister. Men bara från den dag hyresvärden får veta om bristen.
               Därför ska du anmäla skriftligt – och tidigt.
             </p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row lg:flex-col lg:items-start">
               <a href="#kalkylator" className={knappPrimar}>
                 Räkna ut din nedsättning
               </a>
@@ -40,11 +54,14 @@ export default function Startsida() {
               </Link>
             </div>
           </div>
-          <div className="fram fram-2">
-            <TempSkala />
-          </div>
         </div>
       </section>
+
+      <div className="mx-auto max-w-5xl px-4 pt-4 sm:px-6">
+        <div className="max-w-xl">
+          <TempSkala />
+        </div>
+      </div>
 
       <section aria-labelledby="sa-funkar-det" className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
         <h2 id="sa-funkar-det" className="text-3xl font-semibold">
