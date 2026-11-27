@@ -1,3 +1,8 @@
+import { reservAi } from "@/lib/ai";
+import type { Epost, Mejl } from "@/lib/epost";
+import { minnesFiler } from "./filer";
+import { minnesLagring, tomtMinne } from "./lagring";
+import type { AktivaTjanster } from "./tjanst";
 import type { Arende } from "./status";
 import type { AnmalanData } from "./validering";
 
@@ -53,6 +58,35 @@ export function exempelArende(over: Partial<Arende> = {}): Arende {
     kundfragor: 0,
     atgardad: null,
     manadshyra: null,
+    ...over,
+  };
+}
+
+/** Låtsas-e-post som sparar det som "skickas". felPa gör att vissa mejl misslyckas. */
+export function falskEpost(skickat: Mejl[] = [], felPa?: (m: Mejl) => boolean): Epost {
+  return {
+    async skicka(m) {
+      if (felPa?.(m)) throw new Error("Resend svarade 500");
+      skickat.push(m);
+      return { id: `e-${skickat.length}` };
+    },
+  };
+}
+
+/** Skarpa tjänster med lagring i minnet och låtsas-e-post. */
+export function testTjanster(over: Partial<AktivaTjanster> = {}): AktivaTjanster {
+  return {
+    lage: "skarp",
+    lagring: minnesLagring(tomtMinne()),
+    filer: minnesFiler(new Map()),
+    epost: falskEpost(),
+    mottagning: null,
+    ai: reservAi(),
+    fran: "Halvhyra.se <anmalan@halvhyra.se>",
+    svarDoman: "svar.halvhyra.se",
+    lankHemlighet: "hemlis",
+    webhookHemlighet: null,
+    cronHemlighet: null,
     ...over,
   };
 }
