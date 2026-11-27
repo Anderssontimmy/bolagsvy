@@ -117,10 +117,11 @@ en timme.
 
 Ersätter tabellen `anmalan` från 2026-11-25. Den har aldrig tagits i drift.
 
-- **`arende`:** id, kort_id (unik), status, bekrafta_hash, bekrafta_giltig_till, sida_hash, kundens uppgifter (namn,
-  e-post, telefon), adress och lägenhetsnummer, hyresvärdens namn och e-post, brist, temperatur, sedan, beskrivning_kund,
-  beskrivning_ai, brevtext (det slutliga brevet kunden godkände), uppdrag_version, skapad, skickad, paminnelser,
-  nasta_paminnelse, inget_svar_meddelat, kundfragor (0–2), atgardad, manadshyra (frivillig, för uppskattningen).
+- **`arende`:** id, kort_id (unik), status, bekrafta_hash, bekrafta_giltig_till, kundens uppgifter (namn, e-post,
+  telefon), adress och lägenhetsnummer, hyresvärdens namn och e-post, brist, temperatur, sedan, beskrivning_kund,
+  beskrivning_ai, amne och brevtext (det brev kunden godkände) med brev_sha256, uppdrag_version, skapad, skickad,
+  skickad_datum, paminnelser, nasta_paminnelse, inget_svar_meddelat, kundfragor (0–2), atgardad, manadshyra (frivillig,
+  för uppskattningen). En trigger stoppar ändringar av brevet, adresserna och kort_id.
 - **`meddelande`:** id, arende_id, riktning (`ut`/`in`), typ (`anmalan`, `paminnelse`, `kundsvar`, `hyresvardssvar`,
   `okand_avsandare`), fran, till, kopia, amne, text, sha256, leverantor_id (unik), ai_sammanfattning, ai_kategori,
   ai_fraga, skapad. Raderna ändras aldrig (en trigger stoppar update).
@@ -145,14 +146,17 @@ gränssnitt med en minnesvariant för testläget, som i dag.
 | `POST /api/arende/simulera` | Bara i testläge: låtsas att hyresvärden svarar |
 
 Token till ärendesidan står efter `#` i länken och skickas i anropets body, aldrig i adressen, som bekräftelselänken
-i dag. Den gäller tills ärendet raderas. Bara SHA-256 sparas.
+i dag. Den är `kortId.HMAC-SHA256(LANK_HEMLIGHET, kortId)` och sparas inte. Servern räknar fram den på nytt till varje
+mejl och kontrollerar den när sidan öppnas. Den gäller tills ärendet raderas.
 
 ## Lägen
 
 - **skarp:** kräver `RESEND_API_KEY`, `UTSKICK_FRAN`, `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SVAR_DOMAN`,
-  `RESEND_WEBHOOK_SECRET` och `CRON_SECRET`. `ANTHROPIC_API_KEY` är frivillig (utan den används reserven).
-- **test:** när `NODE_ENV` inte är production. Minneslagring, inga mejl. Länkarna visas på skärmen och knappen
-  "Simulera svar från hyresvärden" finns på ärendesidan. AI används om `ANTHROPIC_API_KEY` finns.
+  `RESEND_WEBHOOK_SECRET`, `CRON_SECRET` och `LANK_HEMLIGHET`. `ANTHROPIC_API_KEY` är frivillig (utan den används
+  reserven).
+- **test:** när `NODE_ENV` inte är production, eller när `HALVHYRA_TESTLAGE=ja` (bara för webbläsartesterna, sätts
+  aldrig i drift). Minneslagring, inga mejl. Länkarna visas på skärmen och knappen "Simulera svar från hyresvärden"
+  finns på ärendesidan. AI används om `ANTHROPIC_API_KEY` finns.
 - **av:** produktion utan inställningar. /anmal visar "kommer snart" och väntelistan, som i dag.
 
 "Så funkar det" på startsidan visar de nya stegen (Berätta om bristen – Vi anmäler åt dig – Vi håller dig uppdaterad)
@@ -171,8 +175,10 @@ bara när läget inte är `av`. Annars visas dagens steg. Sajten lovar aldrig n�
 
 ## Fel
 
-- Utskick till hyresvärden misslyckas: ärendet stannar i sin status, kunden ser "Kunde inte skickas, försök igen" och
-  den dagliga körningen försöker igen nästa dag (samma idempotensnyckel).
+- Utskick till hyresvärden misslyckas: ärendet stannar i sin status. Gäller det anmälan ser kunden "Kunde inte
+  skickas, försök igen" och kan trycka Skicka igen (länken gäller 24 timmar). Gäller det en påminnelse försöker den
+  dagliga körningen igen nästa dag. Samma idempotensnyckel gör att inget skickas två gånger.
+- Mejl till kunden misslyckas: loggas med ärende-id, ärendet går vidare ändå.
 - Webhooken svarar 500 vid tillfälliga fel så att Resend försöker igen. Dubbletter stoppas av `leverantor_id`.
 - Hyresvärdens adress studsar: syns först när leveransstatus byggs (utanför den här versionen). Kunden kan se på
   ärendesidan att inget svar har kommit.
