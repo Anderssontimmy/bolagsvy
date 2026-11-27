@@ -3,7 +3,7 @@ import stegAnmal from "@/assets/steg-anmal.jpg";
 import stegDokumentera from "@/assets/steg-dokumentera.jpg";
 import stegKrav from "@/assets/steg-krav.jpg";
 
-const steg: { rubrik: string; text: string; bild: StaticImageData }[] = [
+const STEG_SJALV: { rubrik: string; text: string; bild: StaticImageData }[] = [
   {
     rubrik: "Anmäl skriftligt",
     text: "Skriv till hyresvärden så fort du märker bristen. Hyran kan sänkas först från den dag hyresvärden får veta om den.",
@@ -21,7 +21,27 @@ const steg: { rubrik: string; text: string; bild: StaticImageData }[] = [
   },
 ];
 
-export function SaFunkarDet() {
+const STEG_TJANST: typeof STEG_SJALV = [
+  {
+    rubrik: "Berätta om bristen",
+    text: "Fyll i ett formulär och bifoga gärna foton. Det tar några minuter.",
+    bild: stegDokumentera,
+  },
+  {
+    rubrik: "Vi anmäler åt dig",
+    text: "Vi skickar en skriftlig anmälan till hyresvärden i ditt namn och blir kontaktperson. Du får en kopia.",
+    bild: stegAnmal,
+  },
+  {
+    rubrik: "Vi håller dig uppdaterad",
+    text: "Vi tar emot hyresvärdens svar, påminner om svaret dröjer och mejlar dig när något händer.",
+    bild: stegKrav,
+  },
+];
+
+/** viSkoter: tjänsten är påslagen och vi sköter anmälan åt kunden. Annars visas stegen för att göra det själv. */
+export function SaFunkarDet({ viSkoter = false }: { viSkoter?: boolean }) {
+  const steg = viSkoter ? STEG_TJANST : STEG_SJALV;
   return (
     <ol className="grid gap-8 sm:grid-cols-3 sm:gap-6">
       {steg.map((s, i) => (

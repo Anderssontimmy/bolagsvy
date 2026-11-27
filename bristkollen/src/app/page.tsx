@@ -10,6 +10,7 @@ import { SidHero } from "@/components/SidHero";
 import { ARTIKLAR } from "@/content/artiklar";
 
 export default function Startsida() {
+  const aktiv = utskickLage() !== "av";
   return (
     <>
       <SidHero
@@ -28,8 +29,8 @@ export default function Startsida() {
           Räkna ut din nedsättning
           <Pil />
         </a>
-        <Link href="/artiklar/sa-anmaler-du-en-brist" className={knappPrimar}>
-          Så anmäler du en brist
+        <Link href={aktiv ? "/anmal" : "/artiklar/sa-anmaler-du-en-brist"} className={knappPrimar}>
+          {aktiv ? "Anmäl bristen" : "Så anmäler du en brist"}
           <Pil />
         </Link>
       </SidHero>
@@ -39,9 +40,11 @@ export default function Startsida() {
         <h2 id="sa-funkar-det" className="mt-1 text-[2rem] sm:text-[2.5rem]">
           Så funkar det
         </h2>
-        <p className="mt-3 max-w-2xl text-xl font-light">Tre steg. Det första är det viktigaste.</p>
+        <p className="mt-3 max-w-2xl text-xl font-light">
+          {aktiv ? "Du berättar om bristen – vi sköter kontakten med hyresvärden." : "Tre steg. Det första är det viktigaste."}
+        </p>
         <div className="mt-10">
-          <SaFunkarDet />
+          <SaFunkarDet viSkoter={aktiv} />
         </div>
         <div className="mt-12 flex justify-center">
           <a href="#kalkylator" className={knappPrimar}>
@@ -63,7 +66,7 @@ export default function Startsida() {
             </p>
           </div>
           <div className="mt-10">
-            <Kalkylator anmalanAktiv={utskickLage() !== "av"} />
+            <Kalkylator anmalanAktiv={aktiv} />
           </div>
         </div>
       </section>
