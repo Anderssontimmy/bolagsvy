@@ -1,4 +1,6 @@
+import { brand } from "@/config/brand";
 import { arBristId, type BristId } from "@/data/procentsatser";
+import { tolkaTal } from "@/lib/format";
 import { arGiltigtDatum } from "@/lib/kalkylator";
 import { HONEYPOT_FALT } from "@/lib/vantelista/validering";
 
@@ -20,7 +22,7 @@ export type AnmalanData = {
   beskrivning: string;
 };
 
-export type AnmalanFalt = keyof AnmalanData | "uppdrag";
+export type AnmalanFalt = keyof AnmalanData | "uppdrag" | "foto";
 
 export type AnmalanValidering =
   | { ok: true; spam: false; data: AnmalanData }
@@ -118,4 +120,33 @@ export function valideraAnmalan(body: unknown, idag: string): AnmalanValidering 
       beskrivning,
     },
   };
+}
+
+export const UPPDRAG_VERSION = "2026-11-27-utkast";
+export const UPPDRAG_TEXT = `Jag ger ${brand.namn} i uppdrag att anmäla bristen i mitt namn, ta emot hyresvärdens svar och hålla mig uppdaterad. ${brand.namn} kräver inga pengar och förhandlar inte åt mig.`;
+
+export function valideraKundsvar(varde: unknown): { ok: true; text: string } | { ok: false; fel: string } {
+  const text = typeof varde === "string" ? varde.replace(/\r\n/g, "\n").trim() : "";
+  if (text.length < 2) return { ok: false, fel: "Skriv ditt svar." };
+  if (text.length > 4000) return { ok: false, fel: "Svaret får vara högst 4 000 tecken." };
+  return { ok: true, text };
+}
+
+export function valideraAtgardad(
+  body: { datum?: unknown; manadshyra?: unknown },
+  skickadDatum: string,
+  idag: string,
+): { ok: true; datum: string; manadshyra: number | null } | { ok: false; fel: string } {
+  const datum = typeof body.datum === "string" ? body.datum : "";
+  if (!arGiltigtDatum(datum)) return { ok: false, fel: "Skriv datumet som ÅÅÅÅ-MM-DD." };
+  if (datum < skickadDatum) return { ok: false, fel: "Datumet kan inte vara före dagen anmälan skickades." };
+  if (datum > idag) return { ok: false, fel: "Datumet kan inte vara i framtiden." };
+  const hyraText =
+    typeof body.manadshyra === "string" ? body.manadshyra : typeof body.manadshyra === "number" ? String(body.manadshyra) : "";
+  const hyra = tolkaTal(hyraText);
+  if (hyra === null) return { ok: true, datum, manadshyra: null };
+  if (!Number.isFinite(hyra) || hyra < 500 || hyra > 100_000) {
+    return { ok: false, fel: "Skriv månadshyran i kronor, till exempel 8 500." };
+  }
+  return { ok: true, datum, manadshyra: Math.round(hyra) };
 }

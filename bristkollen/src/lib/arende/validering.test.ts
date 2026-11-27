@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ANMALAN } from "./testdata";
-import { valideraAnmalan } from "./validering";
+import { UPPDRAG_TEXT, valideraAnmalan, valideraAtgardad, valideraKundsvar } from "./validering";
 
 const IDAG = "2026-11-25";
 const indata = (andringar: Record<string, unknown> = {}) => ({ ...ANMALAN, uppdrag: true, ...andringar });
@@ -70,4 +70,43 @@ describe("valideraAnmalan", () => {
   it("markerar ifyllt honeypot-fält som spam", () => {
     expect(valideraAnmalan(indata({ webbplats: "spam" }), IDAG)).toEqual({ ok: true, spam: true });
   });
+});
+
+describe("kundens svar", () => {
+  it("godtar och trimmar text", () => {
+    expect(valideraKundsvar("  Torsdag går bra.\r\n ")).toEqual({ ok: true, text: "Torsdag går bra." });
+  });
+  it("stoppar tomt och för långt", () => {
+    expect(valideraKundsvar(" ").ok).toBe(false);
+    expect(valideraKundsvar("a".repeat(4001)).ok).toBe(false);
+    expect(valideraKundsvar(42).ok).toBe(false);
+  });
+});
+
+describe("åtgärdad", () => {
+  it("godtar datum mellan anmälan och idag, och månadshyra", () => {
+    expect(valideraAtgardad({ datum: "2026-12-10", manadshyra: "9 000" }, "2026-12-01", "2026-12-20")).toEqual({
+      ok: true,
+      datum: "2026-12-10",
+      manadshyra: 9000,
+    });
+  });
+  it("månadshyran är frivillig", () => {
+    expect(valideraAtgardad({ datum: "2026-12-10", manadshyra: "" }, "2026-12-01", "2026-12-20")).toMatchObject({
+      ok: true,
+      manadshyra: null,
+    });
+  });
+  it.each([
+    { skal: "före anmälan", body: { datum: "2026-11-30" } },
+    { skal: "i framtiden", body: { datum: "2026-12-21" } },
+    { skal: "fel format", body: { datum: "nej" } },
+    { skal: "orimlig hyra", body: { datum: "2026-12-10", manadshyra: "12" } },
+  ])("stoppar datum $skal", ({ body }) => {
+    expect(valideraAtgardad(body, "2026-12-01", "2026-12-20").ok).toBe(false);
+  });
+});
+
+it("uppdraget säger att vi inte kräver pengar eller förhandlar", () => {
+  expect(UPPDRAG_TEXT).toContain("kräver inga pengar och förhandlar inte åt mig");
 });
