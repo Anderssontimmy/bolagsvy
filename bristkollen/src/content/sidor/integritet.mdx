@@ -29,19 +29,22 @@ När du skriver upp dig sparar vi:
 
 **Rättslig grund:** Ditt samtycke (artikel 6.1 a i dataskyddsförordningen, GDPR). Du kan ta tillbaka ditt samtycke när du vill.
 
-### Anmälan till hyresvärden
+### När vi sköter ditt ärende
 
-När du ber oss skicka en anmälan sparar vi:
+När du ger oss i uppdrag att anmäla en brist behandlar vi:
 
 - ditt namn, din e-postadress och ditt telefonnummer (om du fyller i det)
 - adressen och lägenhetsnumret
 - hyresvärdens namn och e-postadress
-- bristen och din beskrivning
-- hela texten i anmälan, när den skapades och när den skickades.
+- bristen, din beskrivning och de foton du bifogar
+- all e-post mellan oss och hyresvärden i ärendet, och namn och kontaktuppgifter för den som svarar hos hyresvärden
+- månadshyran, om du anger den när ärendet avslutas.
 
-**Varför:** För att skicka anmälan som du har bett om, och för att spara en kopia som visar vad som skickades och när. Anmälan går till din hyresvärd, med kopia till dig.
+**Varför:** För att utföra uppdraget du har gett oss: skicka anmälan, ta emot hyresvärdens svar, påminna hyresvärden om svaret dröjer och hålla dig uppdaterad. Vi sparar en kopia av allt som skickas och tas emot, så att du kan visa vad som hände och när. Fotona sparas om utan dold information, till exempel platsdata.
 
-**Rättslig grund:** Avtal – vi utför den tjänst du beställer (artikel 6.1 b GDPR).
+**AI:** Vi använder AI för att skriva om din beskrivning till saklig text (du ser och kan ändra texten innan något skickas) och för att sammanfatta hyresvärdens svar. AI:n fattar inga beslut och skickar ingenting själv.
+
+**Rättslig grund:** Avtal – vi utför den tjänst du beställer (artikel 6.1 b GDPR). För uppgifterna om hyresvärdens personal: vårt berättigade intresse av att kunna sköta ärendet åt dig (artikel 6.1 f GDPR). [Ska bekräftas av jurist.]
 
 ### Kalkylatorn
 
@@ -67,16 +70,17 @@ Om du mejlar oss använder vi det du skriver för att svara dig.
 
 Vi sparar dina uppgifter på väntelistan tills du ber oss ta bort dem eller tar tillbaka ditt samtycke, men högst 24 månader efter att du skrev upp dig. [Förslag – ska bekräftas.]
 
-Skickade anmälningar sparar vi i 3 år, så att du kan få en kopia om du behöver den i en tvist. Anmälningar som aldrig bekräftas raderar vi efter 7 dagar. [Förslag – ska bekräftas. Raderingen är inte automatiserad än.]
+Ärenden, med all e-post och alla foton, sparar vi i 3 år efter att ärendet avslutades, så att du kan få en kopia om du behöver den i en tvist. Du kan be oss radera dem tidigare. Anmälningar som aldrig bekräftas raderas automatiskt efter 24 timmar. [Förslag – ska bekräftas. Raderingen efter 3 år är inte automatiserad än.]
 
 ## Vilka som får ta del av uppgifterna
 
 Vi använder några leverantörer för att driva tjänsten. De kallas *personuppgiftsbiträden* och får bara använda uppgifterna enligt våra instruktioner:
 
-- **Supabase** – databas där väntelistan och anmälningarna sparas. Servrar inom EU.
+- **Supabase** – databas och fillagring där väntelistan, ärendena och fotona sparas. Servrar inom EU.
 - **Vercel** – driver webbplatsen. Vercel är ett amerikanskt företag, så uppgifter kan föras över till USA. Överföringen ska skyddas enligt EU:s regler, till exempel EU:s beslut om ramverket för dataskydd mellan EU och USA eller EU:s standardavtalsklausuler. [Ska kontrolleras före lansering.]
 - **Plausible** – statistik utan kakor. Företag och servrar inom EU.
-- **Resend** – skickar mejlen när du anmäler en brist. Resend är ett amerikanskt företag, så uppgifter kan föras över till USA med samma skydd som för Vercel. [Ska kontrolleras före lansering.]
+- **Resend** – skickar mejlen i ärendet och tar emot hyresvärdens svar. Resend är ett amerikanskt företag, så uppgifter kan föras över till USA med samma skydd som för Vercel. [Ska kontrolleras före lansering.]
+- **Anthropic** – AI som skriver om din beskrivning och sammanfattar hyresvärdens svar. Anthropic är ett amerikanskt företag, så uppgifter kan föras över till USA med samma skydd som för Vercel. [Ska kontrolleras före lansering.]
 
 Din **hyresvärd** får anmälan som du ber oss skicka. Hyresvärden blir själv ansvarig för hur uppgifterna används där.
 

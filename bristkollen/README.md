@@ -1,4 +1,4 @@
-# Halvhyra.se – fas 1
+# Halvhyra.se
 
 Halvhyra.se hjälper hyresgäster med förstahandskontrakt att få sänkt hyra när lägenheten har brister.
 Fas 1 innehåller landningssida, kalkylator, väntelista, fem artiklar och juridiska sidor (utkast).
@@ -59,21 +59,41 @@ Kopiera `.env.example` till `.env.local` och fyll i det du behöver. Allt är fr
 Om `SUPABASE_URL` eller `SUPABASE_SECRET_KEY` saknas i produktion sparas väntelistan bara i minnet, och servern
 loggar en varning. Sätt alltid båda innan lansering.
 
-### Anmälan till hyresvärden – tre lägen
+### Vi sköter ärendet – tre lägen
 
-| Läge  | När                                                                            | Vad händer                                                                 |
-| ----- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
-| Test  | Lokalt (`npm run dev`) utan `RESEND_API_KEY`                                   | Inga mejl skickas. Bekräftelselänken visas på skärmen. Allt sparas i minnet. |
-| Av    | Produktion utan alla fyra: `RESEND_API_KEY`, `UTSKICK_FRAN`, `SUPABASE_URL`, `SUPABASE_SECRET_KEY` | `/anmal` visar "snart" och väntelistan. Knappen i kalkylatorn syns inte.   |
-| Skarp | Alla fyra är satta                                                             | Riktiga mejl. Anmälningar sparas i Supabase.                               |
+Kunden berättar om bristen på `/anmal`. Vi skickar den skriftliga anmälan till hyresvärden i kundens namn, blir
+kontaktperson, tar emot svaren, påminner när svar dröjer och mejlar kunden när något händer. Vi kräver inga pengar och
+förhandlar inte. Design: `docs/superpowers/specs/2026-11-27-vi-skoter-arendet-design.md`, byggplan:
+`docs/superpowers/plans/2026-11-27-vi-skoter-arendet.md`.
 
-Flödet: hyresgästen fyller i `/anmal` och ser exakt vilken text som skickas → vi mejlar en bekräftelselänk till
-hyresgästen → hyresgästen öppnar länken och trycker på Skicka → anmälan går till hyresvärden med kopia till hyresgästen,
-och svar går direkt till hyresgästen (reply-to). Ingenting skickas utan att hyresgästen har bekräftat från sin egen
-e-post, så ingen kan skicka anmälningar i någon annans namn.
+| Läge  | När | Vad händer |
+| ----- | --- | ---------- |
+| Test  | Lokalt (`npm run dev`), eller `HALVHYRA_TESTLAGE=ja` i webbläsartesterna | Inga mejl. Länkarna visas på skärmen och knappen "Simulera svar från hyresvärden" finns på ärendesidan. Allt sparas i minnet. |
+| Av    | Produktion utan alla variabler för skarpt läge | `/anmal` visar "snart" och väntelistan. Startsidan visar stegen för att anmäla själv. |
+| Skarp | `RESEND_API_KEY`, `UTSKICK_FRAN`, `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `SVAR_DOMAN`, `RESEND_WEBHOOK_SECRET`, `CRON_SECRET` och `LANK_HEMLIGHET` är satta | Riktiga mejl, Supabase och daglig körning. `ANTHROPIC_API_KEY` är frivillig. |
 
-**Ställ in Resend:** skapa ett konto på resend.com → *Domains → Add domain* (din domän) → lägg in DNS-posterna som
-Resend visar (SPF och DKIM) → vänta tills domänen är verifierad → skapa en API-nyckel med behörigheten *Sending access*.
+Flödet:
+
+1. Kunden fyller i `/anmal`, bifogar högst 5 foton och ser hela brevet. AI:n skriver om beskrivningen till saklig
+   text, som kunden kan ändra.
+2. Vi mejlar en bekräftelselänk. Först när kunden trycker Skicka på länkens sida går anmälan till hyresvärden, från
+   vår adress med kundens namn, kopia till kunden och svarsadressen `arende-<kortId>@SVAR_DOMAN`.
+3. Hyresvärdens svar kommer till `/api/inkommande` (Resend-webhook). Bara mejl från hyresvärdens adress eller domän
+   sammanfattas av AI och skickas vidare till kunden. Allt syns på kundens ärendesida (`/arende#…`).
+4. `/api/cron/dagligen` (Vercel Cron 08.00/09.00 svensk tid) skickar påminnelse 1 och 2 efter 7 och 14 dagar utan
+   svar, berättar om nästa steg efter 21 dagar, frågar kunden om bristen är åtgärdad dag 14 och 30 och raderar
+   obekräftade ärenden.
+5. Kunden kan svara hyresvärden och markera bristen som åtgärdad på ärendesidan.
+
+**Prova lokalt:** `npm run dev` → http://localhost:3000/anmal → fyll i → granska → öppna länken → Skicka → Följ ditt
+ärende → "Simulera svar från hyresvärden".
+
+**Ställ in Resend:** konto på resend.com → *Domains → Add domain* (din domän) → DNS-posterna (SPF, DKIM) → vänta på
+verifiering → API-nyckel med full behörighet (sändning och mottagning). Mottagning: lägg till `svar.<domän>` och dess
+MX-post enligt *Domains → Receiving* → *Webhooks → Add webhook* för `email.received` till
+`https://<domän>/api/inkommande` → kopiera hemligheten (`whsec_…`) till `RESEND_WEBHOOK_SECRET`.
+
+**Supabase:** kör `supabase/schema.sql` (skapar också den privata bucketen `bilagor`).
 
 Statistikhändelser: `kalkylator_start` (första ändringen i kalkylatorn), `kalkylator_klar` (ett resultat visas, med
 egenskaperna `brist` och `utfall`) och `vantelista_anmalan` (lyckad anmälan, med `brist` om den är vald) och `anmalan_skickad` (en anmälan har skickats till hyresvärden). För att se

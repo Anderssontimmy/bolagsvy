@@ -106,15 +106,18 @@ Filer: `src/lib/anmalan/brev.ts` (texterna), `src/components/AnmalanFormular.tsx
 
 - [ ] Brevtexten, särskilt: "Jag begär nedsättning av hyran från och med den dag ni tar emot den här anmälan, tills
       bristen är åtgärdad."
-- [ ] Avsändaren visas som "Namn via Halvhyra.se" från vår adress. Svar går till hyresgästen (reply-to), och
-      hyresgästen får en kopia. Sista stycket säger att anmälan skickades via oss på uppdrag av hyresgästen.
+- [ ] Avsändaren visas som "Namn via Halvhyra.se" från vår adress. Svar går till ärendets egen adress (reply-to)
+      och vidare till hyresgästen, som också får en kopia. Sista stycket säger att anmälan skickades via oss på uppdrag av hyresgästen.
 - [ ] Gäller ett mejl som vi skickar som hyresgästens skriftliga anmälan? (Se öppen fråga 3.)
-- [ ] Uppdragstexten: "Jag ger Halvhyra.se i uppdrag att skicka anmälan i mitt namn till hyresvärden. Uppgifterna
-      stämmer."
 - [ ] Skyddet mot missbruk: inget skickas förrän hyresgästen har bekräftat via en länk till sin egen e-post (giltig i
       24 timmar). Räcker det?
-- [ ] Lagringstid: förslaget är 3 år för skickade anmälningar och 7 dagar för obekräftade.
+- [ ] Lagringstid: förslaget är 3 år efter avslut för ärenden. Obekräftade raderas automatiskt efter 24 timmar.
 - [ ] Nya avsnitt i villkoren och integritetspolicyn (rättslig grund: avtal, Resend som biträde i USA).
+- [ ] Uppdraget (`UPPDRAG_TEXT` i `src/lib/arende/validering.ts`): räcker det som fullmakt för att anmäla, ta emot svar
+      och skicka påminnelser i hyresgästens namn? Behövs signering (BankID) senare?
+- [ ] Mallarna för påminnelse och kundens svar (`src/lib/arende/brev.ts`) och sidfoten.
+- [ ] AI läser hyresvärdens mejl (personuppgifter om hyresvärdens anställda). Anthropic som biträde, överföring till USA.
+- [ ] Mejl från andra än hyresvärden till ärendets adress sparas men skickas inte vidare. Okej att spara dem?
 
 ## 7. Marknadsföring och påståenden
 
