@@ -1,36 +1,34 @@
 /**
- * Steg 1 av anmälan: spara den och mejla en bekräftelselänk till hyresgästen.
- * Ingenting skickas till hyresvärden förrän hyresgästen har bekräftat (se ./bekrafta).
- * Det hindrar att någon skickar anmälningar i någon annans namn.
+ * Steg 1: spara ärendet med foton och mejla en bekräftelselänk till kunden.
+ * Ingenting skickas till hyresvärden förrän kunden har bekräftat (se ./bekrafta).
  */
 import { randomUUID } from "node:crypto";
-import { brand } from "@/config/brand";
 import { skapaBekraftelse, skapaBrev } from "@/lib/arende/brev";
-import { hamtaTjanster, idagSverige, sha256, skapaToken } from "@/lib/arende/tjanst";
-import { valideraAnmalan } from "@/lib/arende/validering";
+import { behandlaFoto, valideraFoton } from "@/lib/arende/foto";
+import { avstangd, basAdress, fel, forManga, ipFran, olasligt } from "@/lib/arende/http";
+import type { Arende } from "@/lib/arende/status";
+import { hamtaTjanster, idagSverige, sha256, skapaKortId, skapaToken } from "@/lib/arende/tjanst";
+import { UPPDRAG_VERSION, valideraAnmalan } from "@/lib/arende/validering";
 import { skapaBegransare } from "@/lib/vantelista/begransning";
 
 const GILTIG_MS = 24 * 60 * 60 * 1000;
 const tillat = skapaBegransare({ max: 5, fonsterMs: 60 * 60 * 1000 });
 
 export async function POST(request: Request) {
-  const tjanster = hamtaTjanster();
-  if (tjanster.lage === "av") {
-    return Response.json({ ok: false, meddelande: "Den här tjänsten är inte igång än." }, { status: 503 });
+  const t = hamtaTjanster();
+  if (t.lage === "av") return avstangd();
+  if (!tillat(ipFran(request))) return forManga();
+  if (Number(request.headers.get("content-length") ?? 0) > 4_500_000) {
+    return fel("Fotona är för stora. Ta bort något foto och försök igen.", 413);
   }
 
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "okand";
-  if (!tillat(ip)) {
-    return Response.json({ ok: false, meddelande: "Du har försökt många gånger. Försök igen om en stund." }, { status: 429 });
-  }
-
-  const text = await request.text();
-  if (text.length > 10_000) return Response.json({ ok: false, meddelande: "För mycket text." }, { status: 413 });
-  let body: unknown;
+  let form: FormData;
+  let body: Record<string, unknown>;
   try {
-    body = JSON.parse(text);
+    form = await request.formData();
+    body = JSON.parse(String(form.get("data") ?? "")) as Record<string, unknown>;
   } catch {
-    return Response.json({ ok: false, meddelande: "Formuläret kunde inte läsas. Försök igen." }, { status: 400 });
+    return olasligt();
   }
 
   const resultat = valideraAnmalan(body, idagSverige());
@@ -38,47 +36,85 @@ export async function POST(request: Request) {
   if (resultat.spam) return Response.json({ ok: true });
   const d = resultat.data;
 
+  const filer = form.getAll("foto").filter((f): f is File => f instanceof File);
+  const fotoFel = valideraFoton(filer);
+  if (fotoFel) return Response.json({ ok: false, fel: { foto: fotoFel } }, { status: 400 });
+  let foton: { data: Buffer; sha256: string }[];
+  try {
+    foton = await Promise.all(filer.map(async (f) => behandlaFoto(Buffer.from(await f.arrayBuffer()))));
+  } catch {
+    return Response.json({ ok: false, fel: { foto: "Ett av fotona kunde inte läsas. Prova ett annat foto." } }, { status: 400 });
+  }
+
   const brev = skapaBrev(d);
   const token = skapaToken();
   const id = randomUUID();
   const nu = Date.now();
-  // Lokalt pekar länken på den egna servern, i drift på sajtens adress.
-  const bas = tjanster.lage === "test" ? new URL(request.url).origin : brand.url;
-  const lank = `${bas}/anmal/bekrafta#${token}`;
+  const text = (v: unknown, max: number) => (typeof v === "string" && v.trim() ? v.trim().slice(0, max) : null);
+  const arende: Arende = {
+    id,
+    kortId: skapaKortId(),
+    status: "vantar_bekraftelse",
+    bekraftaHash: sha256(token),
+    bekraftaGiltigTill: new Date(nu + GILTIG_MS).toISOString(),
+    kundNamn: d.namn,
+    kundEpost: d.epost,
+    kundTelefon: d.telefon,
+    gatuadress: d.gatuadress,
+    postnummer: d.postnummer,
+    ort: d.ort,
+    lagenhetsnummer: d.lagenhetsnummer,
+    hyresvardNamn: d.hyresvardNamn,
+    hyresvardEpost: d.hyresvardEpost,
+    brist: d.brist,
+    temperatur: d.temperatur,
+    sedan: d.sedan,
+    beskrivningKund: text(body.beskrivningKund, 2000) ?? d.beskrivning,
+    beskrivningAi: text(body.beskrivningAi, 2000),
+    amne: brev.amne,
+    brevtext: brev.text,
+    brevSha256: sha256(`${brev.amne}\n\n${brev.text}`),
+    uppdragVersion: UPPDRAG_VERSION,
+    skapad: new Date(nu).toISOString(),
+    skickad: null,
+    skickadDatum: null,
+    paminnelser: 0,
+    nastaPaminnelse: null,
+    ingetSvarMeddelat: false,
+    kundfragor: 0,
+    atgardad: null,
+    manadshyra: null,
+  };
+  const lank = `${basAdress(t, request)}/anmal/bekrafta#${token}`;
 
   try {
-    await tjanster.lagring.skapa({
-      id,
-      tokenHash: sha256(token),
-      giltigTill: new Date(nu + GILTIG_MS).toISOString(),
-      status: "vantar",
-      hyresgastNamn: d.namn,
-      hyresgastEpost: d.epost,
-      hyresvardNamn: d.hyresvardNamn,
-      hyresvardEpost: d.hyresvardEpost,
-      amne: brev.amne,
-      innehall: brev.text,
-      innehallSha256: sha256(`${brev.amne}\n\n${brev.text}`),
-      skapad: new Date(nu).toISOString(),
-      skickad: null,
-      leverantorId: null,
-    });
-
-    if (tjanster.lage === "skarp") {
-      const mejl = skapaBekraftelse(d, brev, lank);
-      await tjanster.epost.skicka({
-        fran: tjanster.fran,
-        till: [d.epost],
-        amne: mejl.amne,
-        text: mejl.text,
-        idempotensnyckel: `bekrafta-${id}`,
+    await t.lagring.skapa(arende);
+    for (const [i, foto] of foton.entries()) {
+      const filnamn = `foto-${i + 1}.jpg`;
+      const sokvag = `${id}/${filnamn}`;
+      await t.filer.spara(sokvag, foto.data, "image/jpeg");
+      await t.lagring.laggTillBilaga({
+        id: randomUUID(),
+        arendeId: id,
+        meddelandeId: null,
+        kalla: "kund",
+        filnamn,
+        mime: "image/jpeg",
+        storlek: foto.data.length,
+        sha256: foto.sha256,
+        sokvag,
+        skapad: new Date(nu).toISOString(),
       });
     }
-  } catch (fel) {
-    console.error("Kunde inte skapa anmälan:", fel instanceof Error ? fel.message : "okänt fel");
-    return Response.json({ ok: false, meddelande: "Något gick fel hos oss. Försök igen om en stund." }, { status: 500 });
+    if (t.epost) {
+      const mejl = skapaBekraftelse(d, brev, lank);
+      await t.epost.skicka({ fran: t.fran, till: [d.epost], amne: mejl.amne, text: mejl.text, idempotensnyckel: `bekrafta-${id}` });
+    }
+  } catch (e) {
+    console.error("Kunde inte skapa ärende:", e instanceof Error ? e.message : "okänt fel");
+    return fel("Något gick fel hos oss. Försök igen om en stund.", 500);
   }
 
   // I testläge skickas inget mejl, så länken visas direkt. Aldrig i skarpt läge.
-  return Response.json({ ok: true, ...(tjanster.lage === "test" ? { testlank: lank } : {}) });
+  return Response.json({ ok: true, ...(t.lage === "test" ? { testlank: lank } : {}) });
 }
