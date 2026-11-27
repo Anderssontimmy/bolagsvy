@@ -25,7 +25,7 @@ type Tillstand =
   | { typ: "klar"; a: Anmalan; skickad: string; kvitto: string | null };
 
 async function anrop(token: string, skicka: boolean) {
-  const svar = await fetch("/api/anmalan/bekrafta", {
+  const svar = await fetch("/api/arende/bekrafta", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token, skicka }),

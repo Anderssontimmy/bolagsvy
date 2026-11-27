@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Kalkylator } from "@/components/Kalkylator";
 import { SidHero } from "@/components/SidHero";
-import { utskickLage } from "@/lib/anmalan/tjanst";
+import { utskickLage } from "@/lib/arende/tjanst";
 import { Vantelista } from "@/components/Vantelista";
 import { PROCENTSATSER, UTKAST, type ProcentRad } from "@/data/procentsatser";
 import { procentSpann } from "@/lib/format";

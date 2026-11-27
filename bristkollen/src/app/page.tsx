@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Kalkylator } from "@/components/Kalkylator";
-import { utskickLage } from "@/lib/anmalan/tjanst";
+import { utskickLage } from "@/lib/arende/tjanst";
 import { SaFunkarDet } from "@/components/SaFunkarDet";
 import { TempSkala } from "@/components/TempSkala";
 import { VanligaFragor } from "@/components/VanligaFragor";

@@ -3,7 +3,7 @@ import { AnmalanFormular } from "@/components/AnmalanFormular";
 import { InfoRuta } from "@/components/InfoRuta";
 import { SidHero } from "@/components/SidHero";
 import { Vantelista } from "@/components/Vantelista";
-import { utskickLage } from "@/lib/anmalan/tjanst";
+import { utskickLage } from "@/lib/arende/tjanst";
 
 export const metadata: Metadata = {
   title: "Anmäl bristen till hyresvärden",

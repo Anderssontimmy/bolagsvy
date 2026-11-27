@@ -5,9 +5,9 @@
  */
 import { randomUUID } from "node:crypto";
 import { brand } from "@/config/brand";
-import { skapaBekraftelse, skapaBrev } from "@/lib/anmalan/brev";
-import { hamtaTjanster, idagSverige, sha256, skapaToken } from "@/lib/anmalan/tjanst";
-import { valideraAnmalan } from "@/lib/anmalan/validering";
+import { skapaBekraftelse, skapaBrev } from "@/lib/arende/brev";
+import { hamtaTjanster, idagSverige, sha256, skapaToken } from "@/lib/arende/tjanst";
+import { valideraAnmalan } from "@/lib/arende/validering";
 import { skapaBegransare } from "@/lib/vantelista/begransning";
 
 const GILTIG_MS = 24 * 60 * 60 * 1000;

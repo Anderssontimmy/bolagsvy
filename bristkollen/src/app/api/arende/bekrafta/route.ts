@@ -5,7 +5,7 @@
  * Skicka kräver ett knapptryck (POST) – e-postprogram som öppnar länkar automatiskt kan inte skicka något.
  */
 import { avsandare } from "@/lib/epost";
-import { hamtaTjanster, sha256 } from "@/lib/anmalan/tjanst";
+import { hamtaTjanster, sha256 } from "@/lib/arende/tjanst";
 import { skapaBegransare } from "@/lib/vantelista/begransning";
 
 const tillat = skapaBegransare({ max: 30, fonsterMs: 10 * 60 * 1000 });

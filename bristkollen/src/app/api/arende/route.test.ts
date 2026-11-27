@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ANMALAN } from "@/lib/anmalan/testdata";
+import { ANMALAN } from "@/lib/arende/testdata";
 import { POST as bekrafta } from "./bekrafta/route";
 import { POST as skapa } from "./route";
 
 let ip = 0;
 function anrop(handler: (r: Request) => Promise<Response>, body: unknown) {
   return handler(
-    new Request("http://localhost:3000/api/anmalan", {
+    new Request("http://localhost:3000/api/arende", {
       method: "POST",
       headers: { "content-type": "application/json", "x-forwarded-for": `10.1.0.${++ip}` },
       body: JSON.stringify(body),

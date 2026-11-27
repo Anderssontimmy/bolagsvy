@@ -7,5 +7,7 @@ export default defineConfig({
   },
   test: {
     include: ["src/**/*.test.ts"],
+    // Testerna får aldrig anropa Anthropic, även om nyckeln finns i miljön.
+    env: { ANTHROPIC_API_KEY: "" },
   },
 });

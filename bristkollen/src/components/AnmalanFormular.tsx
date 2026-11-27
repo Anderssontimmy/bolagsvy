@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { brand } from "@/config/brand";
 import { BRISTTYPER } from "@/data/procentsatser";
-import { skapaBrev, type Mejltext } from "@/lib/anmalan/brev";
-import { valideraAnmalan, type AnmalanData, type AnmalanFalt } from "@/lib/anmalan/validering";
+import { skapaBrev, type Mejltext } from "@/lib/arende/brev";
+import { valideraAnmalan, type AnmalanData, type AnmalanFalt } from "@/lib/arende/validering";
 import { idagIso } from "@/lib/format";
 import { HONEYPOT_FALT } from "@/lib/vantelista/validering";
 
@@ -81,7 +81,7 @@ export function AnmalanFormular({ testlage }: { testlage: boolean }) {
     setServerfel("");
     setSkickar(true);
     try {
-      const svar = await fetch("/api/anmalan", {
+      const svar = await fetch("/api/arende", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...v, uppdrag, [HONEYPOT_FALT]: honeypot.current?.value ?? "" }),
