@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { brand } from "@/config/brand";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { BRISTTYPER } from "@/data/procentsatser";
 import { skapaBrev, type Mejltext } from "@/lib/arende/brev";
-import { valideraAnmalan, type AnmalanData, type AnmalanFalt } from "@/lib/arende/validering";
+import { skalaFoto } from "@/lib/arende/skalaFoto";
+import { FOTO_MAX_ANTAL, UPPDRAG_TEXT, valideraAnmalan, type AnmalanData, type AnmalanFalt } from "@/lib/arende/validering";
 import { idagIso } from "@/lib/format";
 import { HONEYPOT_FALT } from "@/lib/vantelista/validering";
 
@@ -46,6 +46,12 @@ export function AnmalanFormular({ testlage }: { testlage: boolean }) {
   const [serverfel, setServerfel] = useState("");
   const [testlank, setTestlank] = useState("");
   const [kopierad, setKopierad] = useState(false);
+  const [foton, setFoton] = useState<{ blob: Blob; url: string }[]>([]);
+  const [slutText, setSlutText] = useState("");
+  const [aiText, setAiText] = useState<string | null>(null);
+  const [aiLaddar, setAiLaddar] = useState(false);
+  // Brevet byggs om när kunden ändrar beskrivningen, så att förhandsvisningen alltid är det som skickas.
+  const brev = granskad ? skapaBrev({ ...granskad.data, beskrivning: slutText.trim() || granskad.data.beskrivning }) : null;
   const honeypot = useRef<HTMLInputElement>(null);
   const rubrikRef = useRef<HTMLHeadingElement>(null);
 
@@ -68,10 +74,72 @@ export function AnmalanFormular({ testlage }: { testlage: boolean }) {
     if (r.spam) return;
     setFel({});
     setGranskad({ data: r.data, brev: skapaBrev(r.data) });
+    setSlutText(r.data.beskrivning);
+    setAiText(null);
     setSteg("granska");
+    void hamtaAiText(r.data);
+  }
+
+  /** AI skriver om beskrivningen. Går det inte står kundens egen text kvar. */
+  async function hamtaAiText(d: AnmalanData) {
+    setAiLaddar(true);
+    try {
+      const svar = await fetch("/api/arende/utkast", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brist: d.brist, beskrivning: d.beskrivning, temperatur: d.temperatur }),
+      });
+      const json: { text?: string; ai?: boolean } = await svar.json().catch(() => ({}));
+      if (svar.ok && json.text) {
+        setSlutText(json.text);
+        setAiText(json.ai ? json.text : null);
+      }
+    } catch {
+      // Kundens egen text står kvar.
+    } finally {
+      setAiLaddar(false);
+    }
+  }
+
+  async function laggTillFoton(e: ChangeEvent<HTMLInputElement>) {
+    const valda = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (foton.length + valda.length > FOTO_MAX_ANTAL) {
+      setFel((f) => ({ ...f, foto: `Du kan bifoga högst ${FOTO_MAX_ANTAL} foton.` }));
+      return;
+    }
+    try {
+      const nya = await Promise.all(
+        valda.map(async (fil) => {
+          const blob = await skalaFoto(fil);
+          return { blob, url: URL.createObjectURL(blob) };
+        }),
+      );
+      setFoton((f) => [...f, ...nya]);
+      setFel((f) => {
+        const kopia = { ...f };
+        delete kopia.foto;
+        return kopia;
+      });
+    } catch {
+      setFel((f) => ({ ...f, foto: "Ett av fotona kunde inte läsas. Prova ett annat foto." }));
+    }
+  }
+
+  function taBortFoto(index: number) {
+    setFoton((f) => {
+      URL.revokeObjectURL(f[index].url);
+      return f.filter((_, i) => i !== index);
+    });
   }
 
   async function skicka() {
+    const text = slutText.trim();
+    if (text.length < 10 || text.length > 2000) {
+      setFel({ beskrivning: "Beskrivningen ska vara 10–2 000 tecken." });
+      document.getElementById("a-slut")?.focus();
+      return;
+    }
     if (!uppdrag) {
       setFel({ uppdrag: "Du behöver ge oss i uppdrag att skicka anmälan i ditt namn." });
       document.getElementById("a-uppdrag")?.focus();
@@ -81,11 +149,20 @@ export function AnmalanFormular({ testlage }: { testlage: boolean }) {
     setServerfel("");
     setSkickar(true);
     try {
-      const svar = await fetch("/api/arende", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...v, uppdrag, [HONEYPOT_FALT]: honeypot.current?.value ?? "" }),
-      });
+      const form = new FormData();
+      form.set(
+        "data",
+        JSON.stringify({
+          ...v,
+          beskrivning: text,
+          beskrivningKund: v.beskrivning,
+          beskrivningAi: aiText,
+          uppdrag,
+          [HONEYPOT_FALT]: honeypot.current?.value ?? "",
+        }),
+      );
+      foton.forEach((f, i) => form.append("foto", f.blob, `foto-${i + 1}.jpg`));
+      const svar = await fetch("/api/arende", { method: "POST", body: form });
       const json: { fel?: Fel; meddelande?: string; testlank?: string } = await svar.json().catch(() => ({}));
       if (svar.ok) {
         setTestlank(json.testlank ?? "");
@@ -104,8 +181,8 @@ export function AnmalanFormular({ testlage }: { testlage: boolean }) {
   }
 
   async function kopiera() {
-    if (!granskad) return;
-    await navigator.clipboard.writeText(`${granskad.brev.amne}\n\n${granskad.brev.text}`);
+    if (!brev) return;
+    await navigator.clipboard.writeText(`${brev.amne}\n\n${brev.text}`);
     setKopierad(true);
   }
 
@@ -254,6 +331,47 @@ export function AnmalanFormular({ testlage }: { testlage: boolean }) {
                 className={inmatning}
               />
             </Falt>
+            <div>
+              <label htmlFor="a-foto" className="mb-2 block font-bold">
+                Foton <span className="font-normal text-dampad">(frivilligt, högst {FOTO_MAX_ANTAL})</span>
+              </label>
+              <p id="a-foto-hjalp" className="-mt-1 mb-2 text-[0.95rem] text-dampad">
+                Till exempel termometern, fuktfläcken eller det som är trasigt. Fotona skickas med anmälan till
+                hyresvärden.
+              </p>
+              {fel.foto && (
+                <p id="a-foto-fel" className="mb-2 font-semibold text-glod">
+                  {fel.foto}
+                </p>
+              )}
+              <input
+                id="a-foto"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                onChange={laggTillFoton}
+                aria-describedby={["a-foto-hjalp", fel.foto ? "a-foto-fel" : ""].join(" ").trim()}
+                className="block w-full text-base file:mr-4 file:min-h-11 file:cursor-pointer file:rounded-full file:border-0 file:bg-persika file:px-5 file:font-medium file:text-black"
+              />
+              {foton.length > 0 && (
+                <ul className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-5">
+                  {foton.map((f, i) => (
+                    <li key={f.url}>
+                      {/* eslint-disable-next-line @next/next/no-img-element -- lokal förhandsvisning (blob:), inte en bild från servern */}
+                      <img src={f.url} alt={`Foto ${i + 1}`} className="aspect-square w-full rounded-lg object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => taBortFoto(i)}
+                        aria-label={`Ta bort foto ${i + 1}`}
+                        className="mt-1 min-h-11 text-sm font-semibold text-primar underline"
+                      >
+                        Ta bort
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </Del>
 
           {/* Honeypot: dolt för människor, robotar fyller i det. */}
@@ -273,7 +391,35 @@ export function AnmalanFormular({ testlage }: { testlage: boolean }) {
           <h2 id="granska-rubrik" ref={rubrikRef} tabIndex={-1} className="text-2xl font-semibold outline-none sm:text-3xl">
             Så här ser anmälan ut
           </h2>
-          <p>Läs igenom texten. Det är exakt det här som skickas till hyresvärden.</p>
+          <div className="rounded-2xl border border-linje bg-yta p-5 sm:p-6">
+            <label htmlFor="a-slut" className="block font-bold">
+              Beskrivning i anmälan
+            </label>
+            <p id="a-slut-hjalp" className="mt-1 mb-2 text-[0.95rem] text-dampad" aria-live="polite">
+              {aiLaddar
+                ? "AI skriver om din beskrivning så att den blir saklig …"
+                : aiText
+                  ? "Vi har skrivit om din beskrivning med AI. Kontrollera att allt stämmer och ändra gärna."
+                  : "Kontrollera texten och ändra gärna."}
+            </p>
+            {fel.beskrivning && (
+              <p id="a-slut-fel" className="mb-2 font-semibold text-glod">
+                {fel.beskrivning}
+              </p>
+            )}
+            <textarea
+              id="a-slut"
+              rows={6}
+              maxLength={2000}
+              value={slutText}
+              disabled={aiLaddar}
+              onChange={(e) => setSlutText(e.target.value)}
+              aria-describedby={["a-slut-hjalp", fel.beskrivning ? "a-slut-fel" : ""].join(" ").trim()}
+              className={inmatning}
+            />
+          </div>
+
+          <p>Det är exakt det här som skickas till hyresvärden.</p>
 
           <div className="overflow-hidden rounded-2xl border border-linje bg-yta">
             <dl className="grid grid-cols-1 gap-x-4 gap-y-1 border-b border-linje bg-frost px-5 py-4 text-[0.95rem] sm:grid-cols-[auto_minmax(0,1fr)]">
@@ -284,9 +430,15 @@ export function AnmalanFormular({ testlage }: { testlage: boolean }) {
               <dt className="text-dampad">Kopia</dt>
               <dd className="font-semibold break-words">{granskad.data.epost} (du)</dd>
               <dt className="text-dampad">Ämne</dt>
-              <dd className="font-semibold">{granskad.brev.amne}</dd>
+              <dd className="font-semibold">{brev?.amne}</dd>
+              {foton.length > 0 && (
+                <>
+                  <dt className="text-dampad">Bilagor</dt>
+                  <dd className="font-semibold">{foton.length === 1 ? "1 foto" : `${foton.length} foton`}</dd>
+                </>
+              )}
             </dl>
-            <p className="px-5 py-5 font-sans text-[1rem] leading-relaxed break-words whitespace-pre-wrap">{granskad.brev.text}</p>
+            <p className="px-5 py-5 font-sans text-[1rem] leading-relaxed break-words whitespace-pre-wrap">{brev?.text}</p>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -323,7 +475,7 @@ export function AnmalanFormular({ testlage }: { testlage: boolean }) {
                 className="mt-1 h-6 w-6 shrink-0"
               />
               <label htmlFor="a-uppdrag">
-                Jag ger {brand.namn} i uppdrag att skicka anmälan i mitt namn till hyresvärden. Uppgifterna stämmer.{" "}
+                {UPPDRAG_TEXT} Uppgifterna stämmer.{" "}
                 <Link href="/integritet" className="font-semibold text-primar underline">
                   Så hanterar vi dina uppgifter
                 </Link>

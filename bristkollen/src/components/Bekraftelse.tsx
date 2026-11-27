@@ -2,19 +2,21 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { knappPrimar } from "@/components/knappar";
+import { knappPrimar, Pil } from "@/components/knappar";
 import { sparaHandelse } from "@/lib/analys";
 import { tidText } from "@/lib/format";
 
 type Anmalan = {
-  status: "vantar" | "skickad";
+  status: "vantar_bekraftelse" | "skickad" | "besvarad" | "atgardad";
   utgangen: boolean;
   hyresvardNamn: string;
   hyresvardEpost: string;
-  hyresgastEpost: string;
+  kundEpost: string;
   amne: string;
-  innehall: string;
+  brevtext: string;
+  bilagor: string[];
   skickad: string | null;
+  sidaLank: string | null;
   testlage: boolean;
 };
 
@@ -22,7 +24,7 @@ type Tillstand =
   | { typ: "laddar" }
   | { typ: "fel"; meddelande: string }
   | { typ: "visa"; a: Anmalan; skickar: boolean; fel: string }
-  | { typ: "klar"; a: Anmalan; skickad: string; kvitto: string | null };
+  | { typ: "klar"; a: Anmalan; skickad: string | null; sidaLank: string | null };
 
 async function anrop(token: string, skicka: boolean) {
   const svar = await fetch("/api/arende/bekrafta", {
@@ -49,7 +51,7 @@ export function Bekraftelse() {
         : { ok: false, json: { meddelande: "Länken saknar en kod. Öppna länken från mejlet igen." } };
       if (avbruten) return;
       if (!ok) setT({ typ: "fel", meddelande: json.meddelande ?? "Något gick fel. Försök igen." });
-      else if (json.status === "skickad") setT({ typ: "klar", a: json, skickad: json.skickad, kvitto: null });
+      else if (json.status !== "vantar_bekraftelse") setT({ typ: "klar", a: json, skickad: json.skickad, sidaLank: json.sidaLank });
       else setT({ typ: "visa", a: json, skickar: false, fel: "" });
     })();
     return () => {
@@ -67,7 +69,7 @@ export function Bekraftelse() {
     try {
       const { ok, json } = await anrop(lasToken(), true);
       if (ok) {
-        setT({ typ: "klar", a: t.a, skickad: json.skickad, kvitto: json.kvitto ?? null });
+        setT({ typ: "klar", a: t.a, skickad: json.skickad ?? null, sidaLank: json.sidaLank ?? null });
         sparaHandelse("anmalan_skickad");
       } else {
         setT({ ...t, skickar: false, fel: json.meddelande ?? "Anmälan kunde inte skickas. Försök igen." });
@@ -92,34 +94,38 @@ export function Bekraftelse() {
 
   if (t.typ === "klar") {
     return (
-      <section className="rounded-2xl border border-primar/25 bg-frost p-5 sm:p-7" role="status">
+      <section className="rounded-2xl bg-frost p-5 sm:p-7" role="status">
         <h2 ref={rubrikRef} tabIndex={-1} className="text-2xl font-semibold outline-none sm:text-3xl">
           Anmälan är skickad
         </h2>
         <p className="mt-3 text-lg">
-          Skickad {tidText(t.skickad)} till {t.a.hyresvardNamn} ({t.a.hyresvardEpost}).
+          {t.skickad ? `Skickad ${tidText(t.skickad)} till ` : "Skickad till "}
+          {t.a.hyresvardNamn} ({t.a.hyresvardEpost}).
         </p>
         {t.a.testlage ? (
           <p className="mt-4 rounded-xl border-2 border-dashed border-glod bg-glod-ljus p-4">
             <strong>Testläge:</strong> inget mejl skickades. I skarpt läge hade anmälan gått till {t.a.hyresvardEpost}{" "}
-            med kopia till {t.a.hyresgastEpost}.
+            med kopia till {t.a.kundEpost}.
           </p>
         ) : (
           <p className="mt-3">
-            Du har fått en kopia på {t.a.hyresgastEpost}. <strong>Spara den – den är ditt bevis</strong> på vilken dag
-            hyresvärden fick veta om bristen. Svar från hyresvärden kommer direkt till dig.
+            Du har fått en kopia på {t.a.kundEpost}. <strong>Spara den – den är ditt bevis</strong> på vilken dag
+            hyresvärden fick veta om bristen. Svar från hyresvärden kommer till oss, och vi mejlar dig när något
+            händer.
           </p>
         )}
-        {t.kvitto && <p className="mt-3 text-[0.95rem] text-dampad">Kvitto: {t.kvitto}</p>}
         <h3 className="mt-6 text-xl font-semibold">Nästa steg</h3>
         <ul className="mt-2 list-disc space-y-1 pl-6">
           <li>Fortsätt att dokumentera: foton, temperatur och datum.</li>
           <li>Betala hyran som vanligt. Håll aldrig inne hyran.</li>
-          <li>Räkna ut ungefär hur mycket hyran kan sänkas.</li>
+          <li>Svarar hyresvärden inte inom 7 dagar skickar vi en påminnelse.</li>
         </ul>
-        <Link href="/kalkylator" className={`${knappPrimar} mt-5 w-full sm:w-auto`}>
-          Till kalkylatorn
-        </Link>
+        {t.sidaLank && (
+          <a href={t.sidaLank} className={`${knappPrimar} mt-5 w-full sm:w-auto`}>
+            Följ ditt ärende
+            <Pil />
+          </a>
+        )}
       </section>
     );
   }
@@ -151,23 +157,24 @@ export function Bekraftelse() {
             {a.hyresvardNamn} &lt;{a.hyresvardEpost}&gt;
           </dd>
           <dt className="text-dampad">Kopia</dt>
-          <dd className="font-semibold break-words">{a.hyresgastEpost} (du)</dd>
+          <dd className="font-semibold break-words">{a.kundEpost} (du)</dd>
           <dt className="text-dampad">Ämne</dt>
           <dd className="font-semibold">{a.amne}</dd>
+          {a.bilagor.length > 0 && (
+            <>
+              <dt className="text-dampad">Bilagor</dt>
+              <dd className="font-semibold break-words">{a.bilagor.join(", ")}</dd>
+            </>
+          )}
         </dl>
-        <p className="px-5 py-5 leading-relaxed break-words whitespace-pre-wrap">{a.innehall}</p>
+        <p className="px-5 py-5 leading-relaxed break-words whitespace-pre-wrap">{a.brevtext}</p>
       </div>
       {t.fel && (
         <p className="rounded-xl border-2 border-glod bg-glod-ljus p-3 font-semibold" role="alert">
           {t.fel}
         </p>
       )}
-      <button
-        type="button"
-        onClick={skicka}
-        disabled={t.skickar}
-        className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-persika px-7 py-3 text-lg font-medium text-black hover:bg-persika-mork disabled:opacity-70 sm:w-auto"
-      >
+      <button type="button" onClick={skicka} disabled={t.skickar} className={`${knappPrimar} w-full disabled:opacity-70 sm:w-auto`}>
         {t.skickar ? "Skickar …" : `Skicka anmälan till ${a.hyresvardNamn}`}
       </button>
     </section>
