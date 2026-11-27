@@ -106,10 +106,10 @@ Filer: `src/lib/anmalan/brev.ts` (texterna), `src/components/AnmalanFormular.tsx
 
 - [ ] Brevtexten, särskilt: "Jag begär nedsättning av hyran från och med den dag ni tar emot den här anmälan, tills
       bristen är åtgärdad."
-- [ ] Avsändaren visas som "Namn via Bristkollen" från vår adress. Svar går till hyresgästen (reply-to), och
+- [ ] Avsändaren visas som "Namn via Halvhyra.se" från vår adress. Svar går till hyresgästen (reply-to), och
       hyresgästen får en kopia. Sista stycket säger att anmälan skickades via oss på uppdrag av hyresgästen.
 - [ ] Gäller ett mejl som vi skickar som hyresgästens skriftliga anmälan? (Se öppen fråga 3.)
-- [ ] Uppdragstexten: "Jag ger Bristkollen i uppdrag att skicka anmälan i mitt namn till hyresvärden. Uppgifterna
+- [ ] Uppdragstexten: "Jag ger Halvhyra.se i uppdrag att skicka anmälan i mitt namn till hyresvärden. Uppgifterna
       stämmer."
 - [ ] Skyddet mot missbruk: inget skickas förrän hyresgästen har bekräftat via en länk till sin egen e-post (giltig i
       24 timmar). Räcker det?
@@ -121,6 +121,11 @@ Filer: `src/lib/anmalan/brev.ts` (texterna), `src/components/AnmalanFormular.tsx
 - [ ] Rubriken "Du kan ha rätt till sänkt hyra" och att vi aldrig lovar ett visst utfall.
 - [ ] Att vi nämner Hyresgästföreningen, Folkhälsomyndigheten, Fastighetsägarna och Lawline som källor. På om-sidan står
       också att vi inte samarbetar med Hyresgästföreningen eller någon myndighet.
+- [ ] Namnet "Halvhyra.se" (valt 2026-11-27). Kan det uppfattas som ett löfte om halverad hyra? De flesta
+      procentsatserna ligger på 0–45 %.
+- [ ] Utseendet liknar medvetet orimlighyra.se (samma färger, typsnittet Poppins och samma upplägg), på ägarens begäran.
+      Vi använder inte deras namn, logga, bilder, texter eller betalda typsnitt. Finns det risk att det räknas som en
+      förväxlingsbar efterbildning (14 § marknadsföringslagen)?
 
 ## Öppna frågor
 

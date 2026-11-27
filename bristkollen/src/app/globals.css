@@ -8,6 +8,10 @@
 @theme inline {
   --color-papper: var(--brand-papper);
   --color-yta: var(--brand-yta);
+  --color-gra: var(--brand-gra);
+  --color-persika: var(--brand-persika);
+  --color-persika-mork: var(--brand-persika-mork);
+  --color-orange: var(--brand-orange);
   --color-black: var(--brand-black);
   --color-dampad: var(--brand-dampad);
   --color-linje: var(--brand-linje);
@@ -18,7 +22,8 @@
   --color-glod-ljus: var(--brand-glod-ljus);
 
   --font-sans: var(--font-brod), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-rubrik), ui-serif, Georgia, serif;
+  /* Rubriker använder samma typsnitt som brödtexten (Poppins). Namnet font-serif finns kvar för rubrikerna. */
+  --font-serif: var(--font-brod), ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
@@ -32,15 +37,16 @@
     background-color: var(--brand-papper);
     color: var(--brand-black);
     font-family: var(--font-sans);
-    font-size: 1.0625rem;
-    line-height: 1.65;
+    font-size: 1.125rem;
+    line-height: 1.6;
   }
 
   h1,
   h2,
   h3 {
     font-family: var(--font-serif);
-    line-height: 1.2;
+    font-weight: 600;
+    line-height: 1.15;
     text-wrap: balance;
   }
 
@@ -57,6 +63,11 @@
     outline: 3px solid var(--brand-glod);
     outline-offset: 2px;
     border-radius: 4px;
+  }
+
+  /* På mörka ytor (foto, grönt band, sidfot) syns en vit fokusring bättre. */
+  .pa-mork :focus-visible {
+    outline-color: #fff;
   }
 
   input[type="radio"],

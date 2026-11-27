@@ -243,7 +243,7 @@ export function Kalkylator({ anmalanAktiv = false }: { anmalanAktiv?: boolean })
 
         <button
           type="submit"
-          className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-primar px-6 py-3 text-lg font-bold text-white transition-colors hover:bg-primar-mork sm:w-auto"
+          className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-persika px-7 py-3 text-lg font-medium text-black transition-colors hover:bg-persika-mork sm:w-auto"
         >
           Räkna ut
         </button>
@@ -280,8 +280,11 @@ function Grupp({
     <fieldset aria-describedby={beskrivning}>
       <legend className="mb-3 text-lg font-bold">
         {nummer !== undefined && (
-          <span aria-hidden="true" className="mr-2 font-serif text-glod">
-            {nummer}.
+          <span
+            aria-hidden="true"
+            className="mr-2.5 inline-grid h-8 w-8 place-items-center rounded-full bg-persika align-middle text-base font-semibold text-black"
+          >
+            {nummer}
           </span>
         )}
         {legend}
@@ -355,8 +358,11 @@ function Textfalt({
     <div>
       <label htmlFor={id} className="mb-3 block text-lg font-bold">
         {nummer !== undefined && (
-          <span aria-hidden="true" className="mr-2 font-serif text-glod">
-            {nummer}.
+          <span
+            aria-hidden="true"
+            className="mr-2.5 inline-grid h-8 w-8 place-items-center rounded-full bg-persika align-middle text-base font-semibold text-black"
+          >
+            {nummer}
           </span>
         )}
         {label}
@@ -560,7 +566,7 @@ function NastaSteg({ anmalanAktiv }: { anmalanAktiv: boolean }) {
         <li>
           <Link
             href="/anmal"
-            className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-primar px-5 py-3 font-bold text-white hover:bg-primar-mork sm:w-auto"
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-persika px-6 py-3 font-medium text-black hover:bg-persika-mork sm:w-auto"
           >
             Anmäl bristen till hyresvärden
           </Link>
@@ -568,7 +574,7 @@ function NastaSteg({ anmalanAktiv }: { anmalanAktiv: boolean }) {
         <li>
           <Link
             href="/artiklar/sa-anmaler-du-en-brist"
-            className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border-2 border-primar bg-yta px-5 py-3 font-bold text-primar hover:bg-frost sm:w-auto"
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-full border-2 border-black bg-yta px-6 py-3 font-medium text-black hover:bg-gra sm:w-auto"
           >
             Så anmäler du en brist
           </Link>
@@ -581,7 +587,7 @@ function NastaSteg({ anmalanAktiv }: { anmalanAktiv: boolean }) {
       <li>
         <Link
           href="/artiklar/sa-anmaler-du-en-brist"
-          className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-primar px-5 py-3 font-bold text-white hover:bg-primar-mork sm:w-auto"
+          className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-persika px-6 py-3 font-medium text-black hover:bg-persika-mork sm:w-auto"
         >
           Så anmäler du en brist
         </Link>
@@ -589,7 +595,7 @@ function NastaSteg({ anmalanAktiv }: { anmalanAktiv: boolean }) {
       <li>
         <a
           href="#vantelista"
-          className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border-2 border-primar bg-yta px-5 py-3 font-bold text-primar hover:bg-frost sm:w-auto"
+          className="inline-flex min-h-12 w-full items-center justify-center rounded-full border-2 border-black bg-yta px-6 py-3 font-medium text-black hover:bg-gra sm:w-auto"
         >
           Skriv upp dig på väntelistan
         </a>

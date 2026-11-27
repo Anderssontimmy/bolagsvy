@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Atkinson_Hyperlegible_Next, Literata } from "next/font/google";
+import { Poppins } from "next/font/google";
 import Script from "next/script";
 import type { CSSProperties } from "react";
 import { SidFot } from "@/components/SidFot";
@@ -8,14 +8,11 @@ import { brand } from "@/config/brand";
 import { plausibleDoman } from "@/lib/analys";
 import "./globals.css";
 
-const rubrik = Literata({ subsets: ["latin"], variable: "--font-rubrik", display: "swap" });
-const brod = Atkinson_Hyperlegible_Next({
+const brod = Poppins({
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
   variable: "--font-brod",
   display: "swap",
-  // Next har inga fallback-mått för det här typsnittet, så vi anger reservtypsnitt själva.
-  adjustFontFallback: false,
-  fallback: ["system-ui", "sans-serif"],
 });
 
 // brand.farger → --brand-papper, --brand-primar-mork osv.
@@ -37,7 +34,7 @@ export const viewport: Viewport = { themeColor: brand.farger.papper };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="sv" style={farger} className={`${rubrik.variable} ${brod.variable} antialiased`}>
+    <html lang="sv" style={farger} className={`${brod.variable} antialiased`}>
       <body className="flex min-h-dvh flex-col">
         <a
           href="#innehall"

@@ -1,6 +1,6 @@
-# Bristkollen – fas 1
+# Halvhyra.se – fas 1
 
-Bristkollen (arbetsnamn) hjälper hyresgäster med förstahandskontrakt att få sänkt hyra när lägenheten har brister.
+Halvhyra.se hjälper hyresgäster med förstahandskontrakt att få sänkt hyra när lägenheten har brister.
 Fas 1 innehåller landningssida, kalkylator, väntelista, fem artiklar och juridiska sidor (utkast).
 
 - Next.js 16 (App Router), TypeScript i strict-läge, Tailwind CSS 4
@@ -48,12 +48,12 @@ Kopiera `.env.example` till `.env.local` och fyll i det du behöver. Allt är fr
 
 | Variabel                       | Krävs i produktion | Beskrivning                                                                                       |
 | ------------------------------ | ------------------ | ------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL`         | Ja                 | Sajtens adress, t.ex. `https://bristkollen.se`. Används i sitemap och metadata.                    |
+| `NEXT_PUBLIC_SITE_URL`         | Ja                 | Sajtens adress, t.ex. `https://halvhyra.se`. Används i sitemap och metadata.                    |
 | `SUPABASE_URL`                 | Ja                 | Projektets URL, t.ex. `https://abcd.supabase.co`.                                                 |
 | `SUPABASE_SECRET_KEY`          | Ja                 | Hemlig nyckel (`sb_secret_…`) eller äldre `service_role`-nyckel. Bara på servern – aldrig `NEXT_PUBLIC_`. |
 | `RESEND_API_KEY`               | För anmälan        | Nyckel från Resend. Slår på anmälan till hyresvärden, tillsammans med `UTSKICK_FRAN` och Supabase. |
-| `UTSKICK_FRAN`                 | För anmälan        | Avsändare, t.ex. `Bristkollen <anmalan@bristkollen.se>`. Domänen måste vara verifierad i Resend.   |
-| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | Nej                | Slår på Plausible, t.ex. `bristkollen.se`. Tomt = ingen statistik.                                |
+| `UTSKICK_FRAN`                 | För anmälan        | Avsändare, t.ex. `Halvhyra.se <anmalan@halvhyra.se>`. Domänen måste vara verifierad i Resend.   |
+| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | Nej                | Slår på Plausible, t.ex. `halvhyra.se`. Tomt = ingen statistik.                                |
 | `NEXT_PUBLIC_PLAUSIBLE_SRC`    | Nej                | Annan skriptadress, om Plausible ger dig en egen. Standard: `https://plausible.io/js/script.js`.   |
 
 Om `SUPABASE_URL` eller `SUPABASE_SECRET_KEY` saknas i produktion sparas väntelistan bara i minnet, och servern

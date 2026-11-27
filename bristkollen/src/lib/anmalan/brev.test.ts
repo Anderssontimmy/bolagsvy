@@ -28,7 +28,7 @@ describe("skapaBrev", () => {
   });
 
   it("säger att anmälan skickats via tjänsten och att svar går till hyresgästen", () => {
-    expect(brev.text).toMatch(/skickades via Bristkollen .* på uppdrag av Anna Andersson/);
+    expect(brev.text).toMatch(/skickades via Halvhyra.se .* på uppdrag av Anna Andersson/);
     expect(brev.text).toContain("svar på det här mejlet går direkt till Anna Andersson");
   });
 

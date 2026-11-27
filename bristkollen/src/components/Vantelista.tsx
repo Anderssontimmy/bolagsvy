@@ -213,7 +213,7 @@ export function Vantelista() {
           <button
             type="submit"
             disabled={status === "skickar"}
-            className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-primar px-6 py-3 text-lg font-bold text-white hover:bg-primar-mork disabled:opacity-70 sm:w-auto"
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-persika px-7 py-3 text-lg font-medium text-black hover:bg-persika-mork disabled:opacity-70 sm:w-auto"
           >
             {status === "skickar" ? "Skickar …" : "Skriv upp mig"}
           </button>

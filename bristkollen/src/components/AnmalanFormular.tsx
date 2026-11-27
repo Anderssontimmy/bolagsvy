@@ -34,7 +34,7 @@ const ORDNING = Object.keys(TOMT) as (keyof Varden)[];
 const inmatning =
   "block w-full rounded-xl border border-linje bg-yta px-4 py-3 text-lg text-black focus:border-primar aria-invalid:border-2 aria-invalid:border-glod";
 const knapp =
-  "inline-flex min-h-12 items-center justify-center rounded-xl px-6 py-3 text-lg font-bold transition-colors disabled:opacity-70";
+  "inline-flex min-h-12 items-center justify-center rounded-full px-7 py-3 text-lg font-medium transition-colors disabled:opacity-70";
 
 export function AnmalanFormular({ testlage }: { testlage: boolean }) {
   const [v, setV] = useState<Varden>(TOMT);
@@ -262,7 +262,7 @@ export function AnmalanFormular({ testlage }: { testlage: boolean }) {
             <input id="a-webbplats" type="text" tabIndex={-1} autoComplete="off" ref={honeypot} />
           </div>
 
-          <button type="submit" className={`${knapp} w-full bg-primar text-white hover:bg-primar-mork sm:w-auto`}>
+          <button type="submit" className={`${knapp} w-full bg-persika text-black hover:bg-persika-mork sm:w-auto`}>
             Granska anmälan
           </button>
         </form>
@@ -293,7 +293,7 @@ export function AnmalanFormular({ testlage }: { testlage: boolean }) {
             <button
               type="button"
               onClick={() => setSteg("fylla")}
-              className={`${knapp} border-2 border-primar bg-yta text-primar hover:bg-frost`}
+              className={`${knapp} border-2 border-black bg-yta text-black hover:bg-gra`}
             >
               Ändra
             </button>
@@ -343,7 +343,7 @@ export function AnmalanFormular({ testlage }: { testlage: boolean }) {
               type="button"
               onClick={skicka}
               disabled={skickar}
-              className={`${knapp} mt-5 w-full bg-primar text-white hover:bg-primar-mork sm:w-auto`}
+              className={`${knapp} mt-5 w-full bg-persika text-black hover:bg-persika-mork sm:w-auto`}
             >
               {skickar ? "Skickar …" : "Skicka bekräftelselänk till min e-post"}
             </button>

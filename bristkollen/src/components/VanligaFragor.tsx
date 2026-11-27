@@ -82,17 +82,19 @@ const fragor: { fraga: string; svar: ReactNode }[] = [
 
 export function VanligaFragor() {
   return (
-    <div className="divide-y divide-linje rounded-2xl border border-linje bg-yta">
+    <div className="space-y-3">
       {fragor.map((f) => (
-        <details key={f.fraga} className="group px-5 sm:px-6">
-          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-4 text-lg font-semibold [&::-webkit-details-marker]:hidden">
+        <details key={f.fraga} className="group rounded-lg bg-gra px-5 sm:px-6">
+          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 py-4 font-semibold [&::-webkit-details-marker]:hidden">
             {f.fraga}
-            <span
-              className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-linje text-primar transition-transform group-open:rotate-45"
+            <svg
+              viewBox="0 0 20 20"
+              className="h-5 w-5 shrink-0 transition-transform group-open:rotate-180"
               aria-hidden="true"
+              focusable="false"
             >
-              +
-            </span>
+              <path d="m5 7.5 5 5 5-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </summary>
           <div className="pb-5 text-black/90">{f.svar}</div>
         </details>

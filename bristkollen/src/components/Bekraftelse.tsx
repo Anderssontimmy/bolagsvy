@@ -166,7 +166,7 @@ export function Bekraftelse() {
         type="button"
         onClick={skicka}
         disabled={t.skickar}
-        className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-primar px-6 py-3 text-lg font-bold text-white hover:bg-primar-mork disabled:opacity-70 sm:w-auto"
+        className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-persika px-7 py-3 text-lg font-medium text-black hover:bg-persika-mork disabled:opacity-70 sm:w-auto"
       >
         {t.skickar ? "Skickar …" : `Skicka anmälan till ${a.hyresvardNamn}`}
       </button>

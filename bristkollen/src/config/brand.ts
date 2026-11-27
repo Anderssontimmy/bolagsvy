@@ -6,26 +6,30 @@
  * via klasser som bg-primar, text-black och border-linje.
  */
 export const brand = {
-  namn: "Bristkollen",
-  domän: "bristkollen.se",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://bristkollen.se",
-  kontaktEpost: "hej@bristkollen.se",
+  namn: "Halvhyra.se",
+  domän: "halvhyra.se",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://halvhyra.se",
+  kontaktEpost: "hej@halvhyra.se",
   slogan: "Hjälp att få sänkt hyra när lägenheten har brister",
   beskrivning:
     "Kallt hemma eller trasigt i lägenheten? Räkna ut ungefär hur mycket hyran kan sänkas och lär dig hur du anmäler bristen till hyresvärden.",
   /** Version av integritetspolicyn. Sparas med varje anmälan till väntelistan. */
   integritetVersion: "2026-11-25-utkast",
   farger: {
-    papper: "#f7f4ee", // bakgrund
+    papper: "#ffffff", // bakgrund
     yta: "#ffffff", // kort och formulär
-    black: "#1c2430", // brödtext
-    dampad: "#4a5565", // sekundär text
-    linje: "#d9d3c7", // ramar
-    primar: "#1d4b66", // vinterblå: knappar och länkar
-    primarMork: "#143749", // hover
-    frost: "#e4eef3", // ljusblå ytor
-    glod: "#a84d16", // bärnsten: accent och fokusring
-    glodLjus: "#fbeee2", // varningsrutor
+    gra: "#f9fafb", // ljusgrå sektioner och frågerader
+    black: "#0e1116", // brödtext
+    dampad: "#4b5563", // sekundär text
+    linje: "#d1d5db", // ramar
+    primar: "#115b55", // mörkgrön: band, sektioner, länkar
+    primarMork: "#072b36", // hover och mörka ytor
+    frost: "#eff1e5", // ljusa ytor och inaktiva steg
+    persika: "#f9c8b8", // knappar
+    persikaMork: "#f4ad97", // hover på knappar
+    orange: "#f59c21", // dekor (aldrig som textfärg – för låg kontrast)
+    glod: "#a84d16", // accent för text, varningar och fokusring
+    glodLjus: "#fdece6", // varningsrutor
   },
 } as const;
 

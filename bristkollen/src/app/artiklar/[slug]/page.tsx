@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { InfoRuta } from "@/components/InfoRuta";
-import { knappPrimar } from "@/components/knappar";
+import { SidHero } from "@/components/SidHero";
+import { knappPrimar, Pil } from "@/components/knappar";
 import { ARTIKLAR, hamtaArtikel } from "@/content/artiklar";
 import { datumText } from "@/lib/format";
 
@@ -34,12 +35,13 @@ export default async function ArtikelSida({ params }: PageProps<"/artiklar/[slug
   const { default: Innehall } = await import(`@/content/artiklar/${artikel.slug}.mdx`);
 
   return (
-    <article className="mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-14">
+    <article>
+      <SidHero rubrik={artikel.titel} underrubrik={<p>{artikel.beskrivning}</p>} />
+      <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-14">
       <Link href="/artiklar" className="inline-flex min-h-11 items-center font-semibold text-primar underline">
         <span aria-hidden="true">←&nbsp;</span>Alla artiklar
       </Link>
-      <h1 className="mt-4 text-[2rem] font-semibold tracking-tight sm:text-[2.6rem]">{artikel.titel}</h1>
-      <p className="mt-4 text-[0.95rem] text-dampad">
+      <p className="mt-2 text-[0.95rem] text-dampad">
         Senast granskad: <time dateTime={artikel.senastGranskad}>{datumText(artikel.senastGranskad)}</time>
         {!artikel.juristGranskad && " · Utkast – ska granskas av jurist"}
       </p>
@@ -67,15 +69,17 @@ export default async function ArtikelSida({ params }: PageProps<"/artiklar/[slug
         </ol>
       </section>
 
-      <aside className="mt-12 rounded-2xl border border-linje bg-frost p-5 sm:p-7" aria-labelledby="rakna-ut">
+      <aside className="mt-12 rounded-xl bg-gra p-5 sm:p-7" aria-labelledby="rakna-ut">
         <h2 id="rakna-ut" className="text-2xl font-semibold">
           Hur mycket kan din hyra sänkas?
         </h2>
         <p className="mt-2">Svara på några frågor och få en uppskattning i kronor.</p>
         <Link href="/kalkylator" className={`${knappPrimar} mt-5 w-full sm:w-auto`}>
           Till kalkylatorn
+          <Pil />
         </Link>
       </aside>
+      </div>
     </article>
   );
 }

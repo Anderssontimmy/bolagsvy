@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AnmalanFormular } from "@/components/AnmalanFormular";
 import { InfoRuta } from "@/components/InfoRuta";
+import { SidHero } from "@/components/SidHero";
 import { Vantelista } from "@/components/Vantelista";
 import { utskickLage } from "@/lib/anmalan/tjanst";
 
@@ -16,9 +17,9 @@ export default function Anmal() {
   if (lage === "av") {
     return (
       <>
+        <SidHero rubrik="Anmäl bristen till hyresvärden" />
         <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-14">
-          <h1 className="text-[2rem] font-semibold tracking-tight sm:text-[2.6rem]">Anmäl bristen till hyresvärden</h1>
-          <p className="mt-3 text-lg text-dampad">
+          <p className="text-lg text-dampad">
             Snart kan du skicka en skriftlig anmälan till din hyresvärd härifrån. Tills dess: anmäl bristen själv,
             skriftligt, redan i dag.
           </p>
@@ -31,9 +32,10 @@ export default function Anmal() {
   }
 
   return (
+    <>
+    <SidHero rubrik="Anmäl bristen till hyresvärden" />
     <div className="mx-auto max-w-2xl px-4 py-10 break-words sm:px-6 sm:py-14">
-      <h1 className="text-[2rem] font-semibold tracking-tight sm:text-[2.6rem]">Anmäl bristen till hyresvärden</h1>
-      <p className="mt-3 text-lg text-dampad">
+      <p className="text-lg text-dampad">
         Fyll i uppgifterna så skickar vi en skriftlig anmälan till din hyresvärd via e-post. Du får en kopia. Den visar
         vilken dag hyresvärden fick veta om bristen – det är från den dagen hyran kan sänkas.
       </p>
@@ -44,5 +46,6 @@ export default function Anmal() {
         <AnmalanFormular testlage={lage === "test"} />
       </div>
     </div>
+    </>
   );
 }

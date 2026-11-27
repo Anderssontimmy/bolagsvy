@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Kalkylator } from "@/components/Kalkylator";
+import { SidHero } from "@/components/SidHero";
 import { utskickLage } from "@/lib/anmalan/tjanst";
 import { Vantelista } from "@/components/Vantelista";
 import { PROCENTSATSER, UTKAST, type ProcentRad } from "@/data/procentsatser";
@@ -15,17 +16,17 @@ export const metadata: Metadata = {
 export default function KalkylatorSida() {
   return (
     <>
-      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
-        <h1 className="text-[2rem] font-semibold tracking-tight sm:text-[2.6rem]">Hur mycket kan hyran sänkas?</h1>
-        <p className="mt-3 text-lg text-dampad">
-          Svara på några frågor så får du en uppskattning i kronor. Vi sparar inte din hyra eller dina datum.
-        </p>
-        <div className="mt-8">
+      <SidHero
+        rubrik="Hur mycket kan hyran sänkas?"
+        underrubrik={<p>Svara på några frågor så får du en uppskattning i kronor. Vi sparar inte din hyra eller dina datum.</p>}
+      />
+      <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+        <div>
           <Kalkylator anmalanAktiv={utskickLage() !== "av"} />
         </div>
 
         <section aria-labelledby="sa-raknar-vi" className="mt-14">
-          <h2 id="sa-raknar-vi" className="text-2xl font-semibold">
+          <h2 id="sa-raknar-vi" className="text-[1.75rem] sm:text-[2rem]">
             Så räknar vi
           </h2>
           <p className="mt-3">

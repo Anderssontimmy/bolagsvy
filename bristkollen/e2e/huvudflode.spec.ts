@@ -18,7 +18,7 @@ async function fyllKyla(kalk: Locator) {
 test("startsidan är på svenska och har rubrik, kalkylator och väntelista", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("lang", "sv");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Du kan ha rätt till sänkt hyra");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Kallt hemma eller trasigt i lägenheten?");
   await expect(page.getByRole("heading", { name: "Så funkar det" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Räkna ut" })).toBeVisible();
   await expect(page.getByRole("heading", { name: /Snart kan du anmäla bristen/ })).toBeVisible();
