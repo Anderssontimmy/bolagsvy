@@ -150,3 +150,8 @@ export function valideraAtgardad(
   }
   return { ok: true, datum, manadshyra: Math.round(hyra) };
 }
+
+export const FOTO_MAX_ANTAL = 5;
+/** Vercel tar emot högst 4,5 MB per anrop. Webbläsaren skalar ner fotona innan, se skalaFoto.ts. */
+export const FOTO_MAX_TOTAL = 4 * 1024 * 1024;
+export const FOTO_TYPER = ["image/jpeg", "image/png", "image/webp"];
