@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { skapaBekraftelse, skapaBrev } from "./brev";
-import { ANMALAN } from "./testdata";
+import { skapaBekraftelse, skapaBrev, skapaKundsvar, skapaPaminnelse } from "./brev";
+import { ANMALAN, exempelArende } from "./testdata";
 
 describe("skapaBrev", () => {
   const brev = skapaBrev(ANMALAN);
@@ -21,21 +21,22 @@ describe("skapaBrev", () => {
       "Elementen i vardagsrummet och sovrummet är kalla.",
       "Jag ber er att åtgärda bristen så snart som möjligt.",
       "Jag begär nedsättning av hyran från och med den dag ni tar emot den här anmälan",
-      "Ni når mig på anna@exempel.se eller 070-123 45 67.",
     ]) {
       expect(brev.text).toContain(rad);
     }
   });
 
-  it("säger att anmälan skickats via tjänsten och att svar går till hyresgästen", () => {
-    expect(brev.text).toMatch(/skickades via Halvhyra.se .* på uppdrag av Anna Andersson/);
-    expect(brev.text).toContain("svar på det här mejlet går direkt till Anna Andersson");
+  it("säger att svar går till oss och vidare till hyresgästen", () => {
+    expect(brev.text).toContain("Svara på det här mejlet, så når svaret mig.");
+    expect(brev.text).toContain("Vid besök i lägenheten når ni mig också på 070-123 45 67.");
+    expect(brev.text).toMatch(/skickas via Halvhyra\.se \(halvhyra\.se\) på uppdrag av Anna Andersson/);
+    expect(brev.text).toContain("Svar på det här mejlet går till Halvhyra.se, som för det vidare till Anna Andersson.");
   });
 
-  it("har ingen temperaturrad för andra brister", () => {
+  it("har ingen temperaturrad för andra brister och nämner inte telefon när den saknas", () => {
     const annan = skapaBrev({ ...ANMALAN, brist: "hiss", temperatur: null, telefon: null });
     expect(annan.text).not.toContain("temperatur");
-    expect(annan.text).toContain("Ni når mig på anna@exempel.se.");
+    expect(annan.text).not.toContain("Vid besök");
   });
 });
 
@@ -49,4 +50,28 @@ describe("skapaBekraftelse", () => {
     expect(mejl.text).toContain("Ingenting har skickats än");
     expect(mejl.text).toContain(brev.text);
   });
+});
+
+describe("påminnelse", () => {
+  const a = exempelArende({ status: "skickad", skickadDatum: "2026-12-01" });
+  it("hänvisar till anmälan och bifogar den", () => {
+    const p = skapaPaminnelse(a, 1);
+    expect(p.amne).toBe(`Påminnelse: ${a.amne}`);
+    expect(p.text).toContain("den 1 december 2026 och har inte fått något svar.");
+    expect(p.text).not.toContain("andra påminnelse");
+    expect(p.text).toContain(a.brevtext);
+  });
+  it("säger att det är andra påminnelsen", () => {
+    const p = skapaPaminnelse(a, 2);
+    expect(p.amne).toBe(`Påminnelse 2: ${a.amne}`);
+    expect(p.text).toContain("Det här är min andra påminnelse.");
+  });
+});
+
+it("skickar kundens svar oförändrat med namn och sidfot", () => {
+  const a = exempelArende({ status: "besvarad" });
+  const s = skapaKundsvar(a, "Torsdag mellan 8 och 12 går bra.");
+  expect(s.amne).toBe(`Sv: ${a.amne}`);
+  expect(s.text.startsWith("Torsdag mellan 8 och 12 går bra.\n\nVänliga hälsningar\nAnna Andersson")).toBe(true);
+  expect(s.text).toContain("på uppdrag av Anna Andersson");
 });
