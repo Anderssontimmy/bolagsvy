@@ -9,7 +9,7 @@ import { valideraAnmalan, type AnmalanData, type AnmalanFalt } from "@/lib/arend
 import { idagIso } from "@/lib/format";
 import { HONEYPOT_FALT } from "@/lib/vantelista/validering";
 
-type Varden = Record<Exclude<AnmalanFalt, "uppdrag">, string>;
+type Varden = Record<Exclude<AnmalanFalt, "uppdrag" | "foto">, string>;
 type Fel = Partial<Record<AnmalanFalt, string>>;
 
 const TOMT: Varden = {
