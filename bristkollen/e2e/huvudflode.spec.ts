@@ -83,7 +83,7 @@ test("anmälan till hyresvärden är avstängd när e-post inte är inställd", 
 });
 
 test("ingen sida scrollar i sidled", async ({ page }) => {
-  for (const sida of ["/", "/kalkylator", "/anmal", "/artiklar", "/artiklar/sa-anmaler-du-en-brist", "/integritet", "/om"]) {
+  for (const sida of ["/", "/kalkylator", "/anmal", "/artiklar", "/artiklar/sa-anmaler-du-en-brist", "/integritet", "/om", "/arende"]) {
     await page.goto(sida);
     const bredd = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(bredd, sida).toBeLessThanOrEqual(0);
